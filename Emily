@@ -1,1 +1,62 @@
+import re
+import requests
+import urllib
+import util
+import bs4
+import queue
+import sys
+import json
+from collections import deque
 
+
+##########################################################
+################# WEBSITE SCRAPING #######################
+##########################################################
+
+# example restaurant
+r = requests.get("https://www.yelp.com/biz/au-cheval-chicago?osq=Restaurants")
+c = r.text
+restaurant = bs4.BeautifulSoup(c, "html5lib")
+
+def find_review_words(restaurant):
+    '''
+    Finds words within individual reviews
+    '''
+    all_reviews = restaurant.find_all('div', itemprop = "review")
+
+    for review in all_reviews:
+        review = review.text.replace('\n', ' ')
+        keywords = review.split(' ')
+        keywords = [word for word in keywords if word != '']
+
+    return keywords
+
+
+def get_restaurant_info(restaurant):
+    top_reviews = restaurant.find_all('script', type="application/ld+json")[0].string
+    top_reviews = json.loads(top_reviews)
+
+    restaurant_name = top_reviews['name']
+    price_range = top_reviews['priceRange']
+    address = top_reviews['address']['streetAddress']
+    average_rating = top_reviews['aggregateRating']['ratingValue']
+    cuisine = top_reviews['servesCuisine']
+
+
+
+
+
+if __name__ == "__main__":
+    usage = "python3 Emily.py"
+    args_len = len(sys.argv)
+    if args_len == 1:
+        num_pages_to_crawl = 1000
+    elif args_len == 2:
+        try:
+            num_pages_to_crawl = int(sys.argv[1])
+        except ValueError:
+            print(usage)
+            sys.exit(0)
+    else:
+        print(usage)    
+        sys.exit(0)
