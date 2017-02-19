@@ -5,23 +5,83 @@ import util
 import bs4
 import queue
 import sys
-import json
+import json 
+import time
+from yelp.client import Client
+from yelp.oauth1_authenticator import Oauth1Authenticator
+import oauth2
 from collections import deque
 
 
-##########################################################
-################# WEBSITE SCRAPING #######################
-##########################################################
+def get_results():
+    '''
+    Obtains Yelp object using the Yelp API 
 
-# example restaurant
-r = requests.get("https://www.yelp.com/biz/au-cheval-chicago?osq=Restaurants")
-c = r.text
-restaurant = bs4.BeautifulSoup(c, "html5lib")
+    Outputs: 
+        chicago_restaurants: json object 
+    '''
+    consumer_key = "MTzuVjKQZCEcQAqcJR4PuA"
+    consumer_secret = "VIKI3HCnTitDaFWGV-rgpmMMRH0"
+    token = "T6KDelwf6GY9lDuegylzmBohFjAabmKl"
+    token_secret = "bJF2MqIjjQm-V2Pe35awiea6MFQ"
+       
+    session = oauth2.Consumer(consumer_key, consumer_secret)
+
+    category_filter = 'restaurants'
+    location = 'Chicago'
+    options =  'category_filter=%s&location=%s' % (category_filter, location)
+    url = 'http://api.yelp.com/v2/search/?' + options
+
+    oauth_request = oauth2.Request('GET', url, {})
+    oauth_request.update({'oauth_nonce'      : oauth2.generate_nonce(),
+                          'oauth_timestamp'  : oauth2.generate_timestamp(),
+                          'oauth_token'       : token,
+                          'oauth_consumer_key': consumer_key})
+
+    token = oauth2.Token(token, token_secret)
+    oauth_request.sign_request(oauth2.SignatureMethod_HMAC_SHA1(), session, token)
+    signed_url = oauth_request.to_url()
+
+    resp = requests.get(url=signed_url)
+    chicago_restaurants = resp.json()
+       
+    return chicago_restaurants
+
+
+def get_index(chicago_restaurants):
+    '''
+    Creates restaurant index from restaurant JSON 
+
+    Inputs:
+        chicago_restaurants: JSON file 
+
+    Outputs:
+        restaurant_index: nested dictionary mapping restaurant name to attributes
+    '''
+    restaurant_index = {}
+
+    restaurants = chicago_restaurants['businesses'] # list of dictionaries
+
+    for restaurant in restaurants:
+        if restaurant['is_closed'] == False:
+            restaurant_name = restaurant['name']
+            restaurant_index[restaurant_name] = {}
+            restaurant_index[restaurant_name]['rating'] = restaurant['rating']
+            restaurant_index[restaurant_name]['cuisine'] = [category[0] for category in restaurant['categories']]
+            restaurant_index[restaurant_name]['location'] = {}
+            restaurant_index[restaurant_name]['location']['address'] = restaurant['location']['address'][0]
+            restaurant_index[restaurant_name]['location']['latitude'] = restaurant['location']['coordinate']['latitude']
+            restaurant_index[restaurant_name]['location']['longitude'] = restaurant['location']['coordinate']['longitude']
+            # review_count = restaurant['review_count']
+            # review_text = restaurant['snippet_text']  
+
+    return restaurant_index
+
+'''
+
 
 def find_review_words(restaurant):
-    '''
-    Finds words within individual reviews
-    '''
+    # Finds words within individual reviews
     all_reviews = restaurant.find_all('div', itemprop = "review")
 
     for review in all_reviews:
@@ -42,21 +102,45 @@ def get_restaurant_info(restaurant):
     average_rating = top_reviews['aggregateRating']['ratingValue']
     cuisine = top_reviews['servesCuisine']
 
+    rv = {}
+    rv['restaurant_name'] = restaurant_name
+    rv['price_range'] = price_range
+    rv['address'] = address
+    rv['average_rating'] = average_rating
+    rv['cuisine'] = cuisine
+
+    return rv
+
+
+def indexer(index, restaurant):
+    # index: dictionary
+    # restaurant: BeautifulSoup item
+
+    info = get_restaurant_info(restaurant)
+    name = info['restaurant_name'] 
+    review_info = find_review_words(restaurant)
+    price_bounds = re.findall('\d+', info['price_range'])
+    price_bounds_int = []
+    
+    for i in price_bounds:
+        price_bounds_int.append(int(i))
+
+    price_bounds_int = tuple(price_bounds_int)
+
+    index[name] = {}
+    index[name['cuisine']] = info['cuisine']
+    index[name['address']] = info['address']
+    index[name['average_rating']] = info['average_rating']
+    index[name['price_range']] = price_bounds_int
+    index[name['reviews']] = review_info
+
+
+'''
+
 
 
 
 
 if __name__ == "__main__":
-    usage = "python3 Emily.py"
-    args_len = len(sys.argv)
-    if args_len == 1:
-        num_pages_to_crawl = 1000
-    elif args_len == 2:
-        try:
-            num_pages_to_crawl = int(sys.argv[1])
-        except ValueError:
-            print(usage)
-            sys.exit(0)
-    else:
-        print(usage)    
-        sys.exit(0)
+    chicago_restaurants = get_results()
+    get_index(chicago_restaurants)
