@@ -13,7 +13,7 @@ import oauth2
 from collections import deque
 
 
-def get_results():
+def get_yelp_results():
     '''
     Obtains Yelp object using the Yelp API 
 
@@ -43,14 +43,27 @@ def get_results():
     signed_url = oauth_request.to_url()
 
     resp = requests.get(url=signed_url)
-    chicago_restaurants = resp.json()
+    chicago_yelp_restaurants = resp.json()
        
-    return chicago_restaurants
+    return chicago_yelp_restaurants
 
 
-def get_index(chicago_restaurants):
+def get_opentable_results():
+    chicago_ot_restaurants = []
+    for pagenum in range(8):
+        url = 'https://opentable.herokuapp.com/api/restaurants?city=Chicago&per_page=100&page=' + str(pagenum)
+        response = requests.get(url)
+        chicago_ot = response.json()
+        chicago_ot_restaurants.append(chicago_ot['restaurants'])
+
+    chicago_ot_restaurants = [dic for i in range(8) for dic in chicago_ot_restaurants[i]]
+
+    return chicago_ot_restaurants
+
+
+def get_index(chicago_yelp_restaurants, chicago_ot_restaurants):
     '''
-    Creates restaurant index from restaurant JSON 
+    Creates restaurant index from Yelp restaurant JSON 
 
     Inputs:
         chicago_restaurants: JSON file 
@@ -60,7 +73,7 @@ def get_index(chicago_restaurants):
     '''
     restaurant_index = {}
 
-    restaurants = chicago_restaurants['businesses'] # list of dictionaries
+    restaurants = chicago_yelp_restaurants['businesses'] # list of dictionaries
 
     for restaurant in restaurants:
         if restaurant['is_closed'] == False:
@@ -71,9 +84,12 @@ def get_index(chicago_restaurants):
             restaurant_index[restaurant_name]['location'] = {}
             restaurant_index[restaurant_name]['location']['address'] = restaurant['location']['address'][0]
             restaurant_index[restaurant_name]['location']['latitude'] = restaurant['location']['coordinate']['latitude']
-            restaurant_index[restaurant_name]['location']['longitude'] = restaurant['location']['coordinate']['longitude']
-            # review_count = restaurant['review_count']
-            # review_text = restaurant['snippet_text']  
+            restaurant_index[restaurant_name]['location']['longitude'] = restaurant['location']['coordinate']['longitude'] 
+
+    for restaurant in chicago_ot_restaurants:
+        restaurant_name = restaurant['name']
+        if restaurant_name in restaurant_index:
+            restaurant_index[restaurant_name]['price'] = restaurant['price']
 
     return restaurant_index
 
@@ -142,5 +158,7 @@ def indexer(index, restaurant):
 
 
 if __name__ == "__main__":
-    chicago_restaurants = get_results()
-    get_index(chicago_restaurants)
+    chicago_yelp_restaurants = get_yelp_results()
+    chicago_ot_restaurants = get_opentable_results()
+    get_index(chicago_yelp_restaurants, chicago_ot_restaurants)
+   
