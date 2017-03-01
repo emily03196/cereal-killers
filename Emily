@@ -14,12 +14,12 @@ from rauth import OAuth1Session
 
 '''
 def get_yelp_results():
-    '''
+    #
     Obtains Yelp object using the Yelp API 
 
     Outputs: 
         chicago_restaurants: json object 
-    '''
+    #
     consumer_key = "MTzuVjKQZCEcQAqcJR4PuA"
     consumer_secret = "VIKI3HCnTitDaFWGV-rgpmMMRH0"
     token = "T6KDelwf6GY9lDuegylzmBohFjAabmKl"
@@ -126,7 +126,7 @@ def get_large_index(yelp_results, chicago_ot_restaurants):
 '''
 def get_index(chicago_yelp_restaurants, chicago_ot_restaurants):
 
-    '''
+    #
     Creates restaurant index from Yelp restaurant JSON 
 
     Inputs:
@@ -134,7 +134,7 @@ def get_index(chicago_yelp_restaurants, chicago_ot_restaurants):
 
     Outputs:
         restaurant_index: nested dictionary mapping restaurant name to attributes
-    '''
+    #
     restaurant_index = {}
 
     restaurants = chicago_yelp_restaurants['businesses'] # list of dictionaries
