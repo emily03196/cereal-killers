@@ -61,6 +61,25 @@ def get_opentable_results():
     return chicago_ot_restaurants
 
 
+def get_reviews(lat,lon):
+    # Place Search
+    search_url = "https://maps.googleapis.com/maps/api/place/nearbysearch/json?location=" + lat + "," \
+        + lon + "&types=food&key=AIzaSyAUxEQ3wrW6UjGNMo7dvW92en-ZOVmb_Z8"
+    response = requests.get(search_url)
+    search = response.json()
+    place_id = search["results"]["place_id"]
+
+    # Place Details
+    details_url = "https://maps.googleapis.com/maps/api/place/details/json?placeid=" + place_id + \
+        "&key=AIzaSyAUxEQ3wrW6UjGNMo7dvW92en-ZOVmb_Z8"
+    response1 = requests.get(details_url)
+    restaurant_details = response1.json()
+    reviews = restaurant_details["result"]["reviews"]
+    price_range = restaurant_details["result"]["price_level"]
+
+    return reviews, price_range
+
+
 def get_index(chicago_yelp_restaurants, chicago_ot_restaurants):
     '''
     Creates restaurant index from Yelp restaurant JSON 
