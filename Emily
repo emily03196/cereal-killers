@@ -1,25 +1,25 @@
 import re
 import requests
 import urllib
-import util
 import bs4
 import queue
 import sys
-import json 
-import time
+import json
 from yelp.client import Client
 from yelp.oauth1_authenticator import Oauth1Authenticator
 import oauth2
 from collections import deque
+import rauth
+from rauth import OAuth1Session
 
-
+'''
 def get_yelp_results():
-    '''
+    #
     Obtains Yelp object using the Yelp API 
 
     Outputs: 
         chicago_restaurants: json object 
-    '''
+    #
     consumer_key = "MTzuVjKQZCEcQAqcJR4PuA"
     consumer_secret = "VIKI3HCnTitDaFWGV-rgpmMMRH0"
     token = "T6KDelwf6GY9lDuegylzmBohFjAabmKl"
@@ -46,6 +46,38 @@ def get_yelp_results():
     chicago_yelp_restaurants = resp.json()
        
     return chicago_yelp_restaurants
+'''
+
+def yelp_results():
+    '''
+    Makes multiple API calls (20 results each) and returns list of api calls
+    '''
+    consumer_key = "MTzuVjKQZCEcQAqcJR4PuA"
+    consumer_secret = "VIKI3HCnTitDaFWGV-rgpmMMRH0"
+    token = "T6KDelwf6GY9lDuegylzmBohFjAabmKl"
+    token_secret = "bJF2MqIjjQm-V2Pe35awiea6MFQ"
+
+    session = rauth.OAuth1Session(
+        consumer_key = consumer_key, consumer_secret = consumer_secret, access_token = token, 
+        access_token_secret = token_secret)
+
+    params = {}
+    params['category_filter'] = 'restaurants'
+    params['location'] = 'Chicago'
+    params['offset'] = 0
+    api_calls = []
+
+    request = session.get('http://api.yelp.com/v2/search', params = params)
+
+    while params['offset'] < 1000:
+    
+        params['offset'] += 20
+        request = session.get('http://api.yelp.com/v2/search', params = params)
+        api_calls.append(request.json())
+   
+    session.close()
+    return api_calls
+
 
 
 def get_opentable_results():
@@ -62,6 +94,9 @@ def get_opentable_results():
 
 
 def get_reviews(lat,lon):
+    '''
+    Gets reviews from Google Places API for a specific restaurant
+    '''
     # Place Search
     search_url = "https://maps.googleapis.com/maps/api/place/nearbysearch/json?location=" + lat + "," \
         + lon + "&types=food&key=AIzaSyAUxEQ3wrW6UjGNMo7dvW92en-ZOVmb_Z8"
@@ -75,13 +110,49 @@ def get_reviews(lat,lon):
     response1 = requests.get(details_url)
     restaurant_details = response1.json()
     reviews = restaurant_details["result"]["reviews"]
-    price_range = restaurant_details["result"]["price_level"]
+    # price_range = restaurant_details["result"]["price_level"]
 
-    return reviews, price_range
+    return reviews
 
 
-def get_index(chicago_yelp_restaurants, chicago_ot_restaurants):
+def get_large_index(yelp_results, chicago_ot_restaurants):
     '''
+    restaurant index from multiple yelp api calls and ot data 
+    '''
+
+    restaurant_index = {}
+
+    for call in yelp_results:
+        if 'error' not in call:
+            restaurants = call['businesses']
+            for restaurant in restaurants:
+                if restaurant['is_closed'] == False:
+                    restaurant_name = restaurant['name']
+                    restaurant_index[restaurant_name] = {}
+                    restaurant_index[restaurant_name]['rating'] = restaurant['rating']
+                    restaurant_index[restaurant_name]['cuisine'] = [category[0] for category in restaurant['categories']]
+                    restaurant_index[restaurant_name]['location'] = {}
+                    if len(restaurant['location']['address']) > 0:
+                        restaurant_index[restaurant_name]['location']['address'] = restaurant['location']['address'][0]
+                    restaurant_index[restaurant_name]['location']['latitude'] = restaurant['location']['coordinate']['latitude']
+                    lat = restaurant_index[restaurant_name]['location']['latitude']
+                    restaurant_index[restaurant_name]['location']['longitude'] = restaurant['location']['coordinate']['longitude']
+                    lon = restaurant_index[restaurant_name]['location']['longitude']
+                    restaurant_index[restaurant_name]['reviews'] = get_reviews(lat,lon)
+
+
+    for restaurant in chicago_ot_restaurants:
+        restaurant_name = restaurant['name']
+        if restaurant_name in restaurant_index:
+            restaurant_index[restaurant_name]['price'] = restaurant['price']
+
+    return restaurant_index
+
+
+'''
+def get_index(chicago_yelp_restaurants, chicago_ot_restaurants):
+
+    #
     Creates restaurant index from Yelp restaurant JSON 
 
     Inputs:
@@ -89,7 +160,7 @@ def get_index(chicago_yelp_restaurants, chicago_ot_restaurants):
 
     Outputs:
         restaurant_index: nested dictionary mapping restaurant name to attributes
-    '''
+    #
     restaurant_index = {}
 
     restaurants = chicago_yelp_restaurants['businesses'] # list of dictionaries
@@ -112,7 +183,7 @@ def get_index(chicago_yelp_restaurants, chicago_ot_restaurants):
 
     return restaurant_index
 
-'''
+
 
 
 def find_review_words(restaurant):
@@ -174,10 +245,8 @@ def indexer(index, restaurant):
 
 
 
-
-
 if __name__ == "__main__":
-    chicago_yelp_restaurants = get_yelp_results()
+    
     chicago_ot_restaurants = get_opentable_results()
-    get_index(chicago_yelp_restaurants, chicago_ot_restaurants)
-   
+    new_yelp = yelp_results()
+    sample_data = get_large_index(new_yelp, chicago_ot_restaurants)
