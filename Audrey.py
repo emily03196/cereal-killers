@@ -21,8 +21,6 @@ data_file = 'sample_data.json'
 
 with open(data_file, 'r') as f:
     data = f.read()
-data = data.replace('\n ', '')
-data = data.replace("'", '"')
 data_dic = json.loads(data)
 
 
@@ -34,11 +32,11 @@ def locate(location_requirement_dic, data_dic):
     for restaurant, sub_dic in data_dic.items():
         lat2 = sub_dic['location']['latitude']
         lon2 = sub_dic['location']['longitude']
-        #miles = Audrey_util.haversine(float(user_lat), float(user_lon), lat2, lon2) * 1.609344
-        lat2 = str(lat2)
-        lon2 = str(lon2)
-        miles = Audrey_util.compute_distance(user_lat, user_lon, lat2, lon2)
-        miles = float(miles)
+        miles = Audrey_util.haversine(float(user_lon), float(user_lat), lon2, lat2) / 1.609344
+        #lat2 = str(lat2)
+        #lon2 = str(lon2)
+        #miles = Audrey_util.compute_distance(user_lat, user_lon, lat2, lon2)
+        #miles = float(miles)
         if miles <= max_distance:
             located_restaurants[restaurant] = sub_dic
             located_restaurants[restaurant]['distance'] = miles
@@ -54,8 +52,8 @@ def extract_preference(been_to_dic, data_dic):
 
     for restaurant, score in been_to_dic.items():
         score_lst.append(score)
-        #rating_lst.append(data_dic[restaurant]['rating'])
-        #price_lst.append(data_dic[restaurant]['price'])
+        rating_lst.append(data_dic[restaurant]['rating'])
+        price_lst.append(data_dic[restaurant]['price'])
         cuisine_lst = data_dic[restaurant]['cuisine']
         for cuisine in cuisine_lst:
             cuisine_preference_dic[cuisine] = cuisine_preference_dic.get(cuisine, 0) + score/size
