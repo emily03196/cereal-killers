@@ -1,16 +1,14 @@
-import re
 import requests
 import urllib
 import bs4
-import queue
 import sys
 import json
 from yelp.client import Client
 from yelp.oauth1_authenticator import Oauth1Authenticator
 import oauth2
-from collections import deque
 import rauth
 from rauth import OAuth1Session
+from googleplaces import GooglePlaces, types, lang
 
 '''
 def get_yelp_results():
@@ -79,7 +77,6 @@ def yelp_results():
     return api_calls
 
 
-
 def get_opentable_results():
     chicago_ot_restaurants = []
     for pagenum in range(8):
@@ -105,10 +102,10 @@ def get_reviews(lat,lon):
     place_id = search["results"]["place_id"]
 
     # Place Details
-    details_url = "https://maps.googleapis.com/maps/api/place/details/json?placeid=" + place_id + \
+    details_url = "https://maps.googleapis.com/maps/api/place/details/json?placeid=" + str(place_id) + \
         "&key=AIzaSyAUxEQ3wrW6UjGNMo7dvW92en-ZOVmb_Z8"
-    response1 = requests.get(details_url)
-    restaurant_details = response1.json()
+    responsedetails = requests.get(details_url)
+    restaurant_details = response.json()
     reviews = restaurant_details["result"]["reviews"]
     # price_range = restaurant_details["result"]["price_level"]
 
@@ -139,7 +136,6 @@ def get_large_index(yelp_results, chicago_ot_restaurants):
                     restaurant_index[restaurant_name]['location']['longitude'] = restaurant['location']['coordinate']['longitude']
                     lon = restaurant_index[restaurant_name]['location']['longitude']
                     restaurant_index[restaurant_name]['reviews'] = get_reviews(lat,lon)
-
 
     for restaurant in chicago_ot_restaurants:
         restaurant_name = restaurant['name']
