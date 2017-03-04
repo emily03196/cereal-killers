@@ -108,6 +108,7 @@ def get_reviews(lat,lon):
     restaurant_details = response.json()
     reviews = restaurant_details["result"]["reviews"]
     # price_range = restaurant_details["result"]["price_level"]
+    # get website and phone number
 
     return reviews
 
