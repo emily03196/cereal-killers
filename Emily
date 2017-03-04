@@ -98,8 +98,8 @@ def get_reviews(lat,lon):
     Gets reviews from Google Places API for a specific restaurant
     '''
     # Place Search
-    search_url = "https://maps.googleapis.com/maps/api/place/nearbysearch/json?location=" + lat + "," \
-        + lon + "&types=food&key=AIzaSyAUxEQ3wrW6UjGNMo7dvW92en-ZOVmb_Z8"
+    search_url = "https://maps.googleapis.com/maps/api/place/nearbysearch/json?location=" + str(lat) + "," \
+        + str(lon) + "&types=food&key=AIzaSyAUxEQ3wrW6UjGNMo7dvW92en-ZOVmb_Z8"
     response = requests.get(search_url)
     search = response.json()
     place_id = search["results"]["place_id"]
