@@ -2,6 +2,7 @@ from math import radians, cos, sin, asin, sqrt
 import json
 import Audrey_util
 import numpy as np
+import csv
 
 '''
 User input:
@@ -15,12 +16,14 @@ A dictionary of dictionaries with restaurant names as keys, then each sub-dictio
 Review catalog: list of tuples (restaurant name, word)
 '''
 
-been_to_dic = {'The Purple Pig': 4, 'Animale': 5}
+been_to_dic = {'Farmhouse': 4, 'Bar on Buena': 3, 'City  Cafe': 4}
 location_requirement_dic = {'user_lat': '41.78502539999999', 'user_lon': '-87.60034869999998', 'max_distance':10}
 data_file = 'sample_data.json'
+user_data = 'user_data.csv'
 
 with open(data_file, 'r') as f:
     data = f.read()
+<<<<<<< HEAD
 data = data.replace('\n ', '')
 data = data.replace("'", '"')
 data_dic = json.loads(data)
@@ -118,6 +121,45 @@ def rejection(recommendation_lst, been_to_lst, not_cuisine, price_too_high, pric
             recommendation_lst = [recommendation for recommendation in recommendation_lst if recommendation[7] > price]
         recommendation_lst = sorted(sorted(sorted(sorted(recommendation_lst, key=lambda item:item[5]), key=lambda item:item[3], reverse=True), key=lambda item:item[1] + item[2], reverse=True), key=lambda item:item[4])
         return recommendation_lst[0][0], recommendation_lst
+=======
+data = json.loads(data)
+
+def retrieve_info(username, user_data):
+    '''
+    If the user has an existing account, he can retrieve his been_to_dic and default location data, 
+    which automatically show up in the input box
+    '''
+    been_to_dic = None
+    default_location = None
+    with open(user_data, 'r') as user_data:
+        reader = csv.reader(user_data, delimtier = ',')
+        for row in reader:
+            if username == row[0]:
+                been_to_dic = row[2]
+                default_location = row[1]
+    return been_to_dic, default_location
+
+def start(username, location_requirement_dic=None, been_to_dic=None):
+    with open(user_data, 'r') as user_data:
+        reader = csv.reader(user_data, delimtier = ',')
+        for row in reader:
+            if username == row[0]:
+                been_to_dic = row[2]
+                location_requirement_dic = row[1]
+    user = User(location_requirement_dic, been_to_dic)
+    rec, rec_lst = user.generate_recommendation()
+    return rec, rec_lst
+    print('restaurant', rec[0])
+    print('cuisine', rec[6])
+    print('price', rec[7])
+    print('rating', rec[3])
+    print('distance', rec[4])
+    
+
+
+
+            
+>>>>>>> 891aa4b2b8a5801620544e9f4654aa93aa3b75f2
 
 
 
