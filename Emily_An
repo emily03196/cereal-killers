@@ -46,6 +46,35 @@ def yelp_results():
     session.close()
     return api_calls
 
+def get_yelp_results():
+    '''
+    Get yelp results using phone search API from numbers from OT
+    '''
+    consumer_key = "MTzuVjKQZCEcQAqcJR4PuA"
+    consumer_secret = "VIKI3HCnTitDaFWGV-rgpmMMRH0"
+    token = "T6KDelwf6GY9lDuegylzmBohFjAabmKl"
+    token_secret = "bJF2MqIjjQm-V2Pe35awiea6MFQ"
+
+    session = rauth.OAuth1Session(
+        consumer_key = consumer_key, consumer_secret = consumer_secret, access_token = token, 
+        access_token_secret = token_secret)
+
+    final_results = []
+    for restaurant in chicago_ot_restaurants:
+        first = restaurant['phone'].replace('-', '')
+        second = restaurant['phone'].replace('x', '')
+        phone_no = second[0:10]
+    
+        params = {}
+        params['phone'] = phone_no
+
+        request = session.get('https://api.yelp.com/v2/phone_search', params = params)
+        results = request.json()
+        final_results.append(results)
+
+    session.close()
+    return final_results
+
 
 
 def get_opentable_results():
@@ -61,7 +90,7 @@ def get_opentable_results():
     return chicago_ot_restaurants
 
 
-def get_reviews(lat,lon, address):
+def get_google_results(lat,lon, address):
     '''
     Gets reviews from Google Places API for a specific restaurant
     
@@ -73,8 +102,10 @@ def get_reviews(lat,lon, address):
     
     response = requests.get(search_url)
     search = response.json()
-    if type(search) == list:
-    
+
+    google_index = {}
+
+    if len(search['results']) > 0:
         place_id = search['results'][0]['place_id']
         
         insert = 'placeid=%s' % place_id
@@ -83,19 +114,26 @@ def get_reviews(lat,lon, address):
         obj = a.json()
         
         result= obj['result']
-        if 'reviews' in result:
-            reviews = result['reviews']
-            rv = []
-            for review in reviews:
-                rv.append(review['text'])
-            return rv
-        else:
-            return None
+    
+        
+        reviews = result['reviews']
+        rv = []
+        for review in reviews:
+            rv.append(review['text'])
+        
+        google_index['reviews'] = rv
+        google_index['price'] = result['price_level']
+        google_index['hours'] = {}
+        google_index['hours']['periods'] = result['opening_hours']['periods']
+        google_index['hours']['days'] = result['opening_hours']['weekday_text']
+
+        return google_index
     else:
         return None
 
 
-def get_large_index(yelp_results, chicago_ot_restaurants):
+
+def get_large_index(yelp_results):
     '''
     restaurant index from multiple yelp api calls and ot data 
     '''
@@ -104,7 +142,7 @@ def get_large_index(yelp_results, chicago_ot_restaurants):
 
     for call in yelp_results:
         if 'error' not in call:
-            restaurants = call['businesses']
+            restaurant = call['businesses']
             for restaurant in restaurants:
                 if restaurant['is_closed'] == False:
                     restaurant_name = restaurant['name']
@@ -119,13 +157,16 @@ def get_large_index(yelp_results, chicago_ot_restaurants):
                         lat = restaurant_index[restaurant_name]['location']['latitude']
                         restaurant_index[restaurant_name]['location']['longitude'] = restaurant['location']['coordinate']['longitude']
                         lon = restaurant_index[restaurant_name]['location']['longitude']
-                        restaurant_index[restaurant_name]['reviews'] = get_reviews(lat,lon, add)
+                        google = get_google_results(lat, lon, add)
+                        restaurant_index[restaurant_name]['price'] = google['price']
+                        restaurant_index[restaurant_name]['hours'] - google['hours']
+                        cleaned = []
+                        for review in google['reviews']:
+                            clean = clean_up_review(review)
+                            cleaned.append(clean)
+                        restaurant_index[restaurant_name]['reviews'] = cleaned
 
-
-    for restaurant in chicago_ot_restaurants:
-        restaurant_name = restaurant['name']
-        if restaurant_name in restaurant_index:
-            restaurant_index[restaurant_name]['price'] = restaurant['price']
+    
 
     return restaurant_index
 
@@ -135,5 +176,6 @@ def get_large_index(yelp_results, chicago_ot_restaurants):
 if __name__ == "__main__":
     
     chicago_ot_restaurants = get_opentable_results()
-    new_yelp = yelp_results()
-    sample_data = get_large_index(new_yelp, chicago_ot_restaurants)
+    chicago_yelp_restaurants = yelp_results()
+    chicago_google_restaurants = get_google_results
+    sample_data = get_large_index(chicago_yelp_restaurants)
