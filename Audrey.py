@@ -23,106 +23,6 @@ user_data = 'user_data.csv'
 
 with open(data_file, 'r') as f:
     data = f.read()
-<<<<<<< HEAD
-data = data.replace('\n ', '')
-data = data.replace("'", '"')
-data_dic = json.loads(data)
-
-
-def locate(location_requirement_dic, data_dic):
-    user_lat = location_requirement_dic['user_lat'] #string
-    user_lon = location_requirement_dic['user_lon'] #string
-    max_distance = location_requirement_dic['max_distance'] #float
-    located_restaurants_dic = {}
-    for restaurant, sub_dic in data_dic.items():
-        lat2 = sub_dic['location']['latitude']
-        lon2 = sub_dic['location']['longitude']
-        miles = Audrey_util.haversine(float(user_lat), float(user_lon), lat2, lon2) * 1.609344
-        #lat2 = str(lat2)
-        #lon2 = str(lon2)
-        #miles = Audrey_util.compute_distance(user_lat, user_lon, lat2, lon2)
-        #miles = float(miles)
-        if miles <= max_distance:
-            located_restaurants_dic[restaurant] = sub_dic
-            located_restaurants_dic[restaurant]['distance'] = miles
-    return located_restaurants_dic
-
-
-def extract_preference(been_to_dic, data_dic):
-    cuisine_preference_dic = {}
-    #rating_lst = []
-    price_lst =[]
-    score_lst = []
-
-    for restaurant, score in been_to_dic.items():
-        score_lst.append(score)
-        #rating_lst.append(data_dic[restaurant]['rating'])
-        price_lst.append(data_dic[restaurant]['price'])
-        cuisine_lst = data_dic[restaurant]['cuisine']
-        for cuisine in cuisine_lst:
-            cuisine_preference_dic[cuisine] = cuisine_preference_dic.get(cuisine, 0) + score
-    size = len(cuisine_preference_dic)
-    for cuisine in cuisine_preference_dic.keys():
-        cuisine_preference_dic[cuisine] = cuisine_preference_dic[cuisine] / size
-
-    avg_price = np.mean(price_lst)
-    #avg_rating = np.mean(rating_lst)
-
-    return cuisine_preference_dic, avg_price
- 
-
-def generate_recommendation(been_to_dic, location_requirement_dic, data_dic):
-    located_restaurants_dic = locate(location_requirement_dic, data_dic)
-    cuisine_preference_dic, avg_price = extract_preference(been_to_dic, data_dic)
-    recommendation_lst = []
-    been_to_lst = []
-    print('avgprice', avg_price)
-    for restaurant, sub_dic in located_restaurants.items():
-        cuisine_lst = sub_dic['cuisine']
-        cuisine_score = 0
-        for cuisine in cuisine_lst:
-            cuisine_score += cuisine_preference_dic.get(cuisine, 0)
-            cuisine_score = cuisine_score / len(cuisine_lst)
-        price = sub_dic['price']
-        price_score = 4 - abs(avg_price - price)
-        rating_score = sub_dic['rating']
-        distance = sub_dic['distance']
-        been_to_score = 0
-        if restaurant in been_to_dic:
-            been_to_score = 1
-        recommendation_lst.append((restaurant, cuisine_score, price_score, rating_score, been_to_score, distance, cuisine_lst, price))
-        print(restaurant, cuisine_score, price_score, rating_score, been_to_score, distance, cuisine_lst, price)
-    recommendation_lst = sorted(sorted(sorted(sorted(recommendation_lst, key=lambda item:item[5]), key=lambda item:item[3], reverse=True), key=lambda item:item[1]+item[2], reverse=True), key=lambda item:item[4])
-    return recommendation_lst[0][0], recommendation_lst
-
-
-def rejection(recommendation_lst, been_to_lst, not_cuisine, price_too_high, price_too_low, cuisine_preference_dic):
-    rejected_recommendation = recommendation_lst[0]
-    recommendation_lst = recommendation_lst[1:]
-    if not_cuisine is None and price_too_high is None and price_too_low is None:
-        if len(recommendation_lst) == 0:
-            return 'No Options'
-        else:
-            return recommendation_lst[0][0], recommendation_lst
-    else:
-        if not_cuisine is True:
-            disliked_cuisine_lst = rejected_recommendation[6]
-            size = len(disliked_cuisine_lst)  
-            for recommendation in recommendation_lst:
-                cuisine_lst = recommendation[6]
-                cuisine_score = recommendation[1]
-                for cuisine in cuisine_lst:
-                    if cuisine in disliked_cuisine_lst:
-                        cuisine_score -= cuisine_preference_dic.get(cuisine,0) - 1 / size
-                recommendation[1] = cuisine_score
-        if price_too_high is True:
-            recommendation_lst = [recommendation for recommendation in recommendation_lst if recommendation[7] < price]
-        if price_too_low is True:
-            recommendation_lst = [recommendation for recommendation in recommendation_lst if recommendation[7] > price]
-        recommendation_lst = sorted(sorted(sorted(sorted(recommendation_lst, key=lambda item:item[5]), key=lambda item:item[3], reverse=True), key=lambda item:item[1] + item[2], reverse=True), key=lambda item:item[4])
-        return recommendation_lst[0][0], recommendation_lst
-=======
-data = json.loads(data)
 
 def retrieve_info(username, user_data):
     '''
@@ -155,12 +55,6 @@ def start(username, location_requirement_dic=None, been_to_dic=None):
     print('rating', rec[3])
     print('distance', rec[4])
     
-
-
-
-            
->>>>>>> 891aa4b2b8a5801620544e9f4654aa93aa3b75f2
-
 
 
 
