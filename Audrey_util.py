@@ -12,11 +12,22 @@ def compute_distance(lat1, lon1, lat2, lon2):
     match = re.search('[\d.]+', str(tag))
     return match.group()
 
+<<<<<<< HEAD
+
+=======
+>>>>>>> 891aa4b2b8a5801620544e9f4654aa93aa3b75f2
 def haversine(lon1, lat1, lon2, lat2):
     '''
     Calculate the circle distance between two points 
     on the earth (specified in decimal degrees)
     '''
+<<<<<<< HEAD
+    lon1, lat1, lon2, lat2, dlon, dlat = map(radians, [lon1, lat1, lon2, lat2, (lon2-lon1), (lat2-lat1)])
+    a = sin(dlat/2)**2 + cos(lat1) * cos(lat2) * sin(dlon/2)**2
+    c = 2 * asin(sqrt(a)) 
+    km = 6367 * c
+    return km
+=======
     # convert decimal degrees to radians 
     lon1, lat1, lon2, lat2 = map(radians, [lon1, lat1, lon2, lat2])
 
@@ -29,3 +40,4 @@ def haversine(lon1, lat1, lon2, lat2):
     # 6367 km is the radius of the Earth
     km = 6371 * c
     return km 
+>>>>>>> 891aa4b2b8a5801620544e9f4654aa93aa3b75f2

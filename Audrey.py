@@ -23,7 +23,6 @@ user_data = 'user_data.csv'
 
 with open(data_file, 'r') as f:
     data = f.read()
-data = json.loads(data)
 
 def retrieve_info(username, user_data):
     '''
@@ -56,11 +55,6 @@ def start(username, location_requirement_dic=None, been_to_dic=None):
     print('rating', rec[3])
     print('distance', rec[4])
     
-
-
-
-            
-
 
 
 
