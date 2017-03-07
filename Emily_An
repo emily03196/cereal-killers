@@ -14,37 +14,19 @@ from rauth import OAuth1Session
 
 google_API_key = 'AIzaSyCbwSe0OLd9oS25SOonEyvj3o83PAj4OTg'
 
+def get_opentable_results():
+    chicago_ot_restaurants = []
+    for pagenum in range(8):
+        url = 'https://opentable.herokuapp.com/api/restaurants?city=Chicago&per_page=100&page=' + str(pagenum)
+        response = requests.get(url)
+        chicago_ot = response.json()
+        chicago_ot_restaurants.append(chicago_ot['restaurants'])
+
+    chicago_ot_restaurants = [dic for i in range(8) for dic in chicago_ot_restaurants[i]]
+
+    return chicago_ot_restaurants
 
 
-def yelp_results():
-    '''
-    Makes multiple API calls (20 results each) and returns list of api calls
-    '''
-    consumer_key = "MTzuVjKQZCEcQAqcJR4PuA"
-    consumer_secret = "VIKI3HCnTitDaFWGV-rgpmMMRH0"
-    token = "T6KDelwf6GY9lDuegylzmBohFjAabmKl"
-    token_secret = "bJF2MqIjjQm-V2Pe35awiea6MFQ"
-
-    session = rauth.OAuth1Session(
-        consumer_key = consumer_key, consumer_secret = consumer_secret, access_token = token, 
-        access_token_secret = token_secret)
-
-    params = {}
-    params['category_filter'] = 'restaurants'
-    params['location'] = 'Chicago'
-    params['offset'] = 0
-    api_calls = []
-
-    request = session.get('http://api.yelp.com/v2/search', params = params)
-
-    while params['offset'] < 1000:
-    
-        params['offset'] += 20
-        request = session.get('http://api.yelp.com/v2/search', params = params)
-        api_calls.append(request.json())
-   
-    session.close()
-    return api_calls
 
 def get_yelp_results():
     '''
@@ -70,24 +52,50 @@ def get_yelp_results():
 
         request = session.get('https://api.yelp.com/v2/phone_search', params = params)
         results = request.json()
+        results['ot_address'] = restaurant['address']
         final_results.append(results)
 
     session.close()
     return final_results
 
+def get_google_reviews(data):
+    review_index = {}
+    for call in data:
+        if 'error' not in call:
+            restaurants = call['businesses']
+            for restaurant in restaurants:
+                if restaurant['is_closed'] == False:
+                    if len(restaurant['location']['address']) > 0:
+                        restaurant_name = restaurant['name']
+                        review_index[restaurant_name] = []
+                        
 
+                        address = restaurant['location']['address'][0]
+                        lat = restaurant['location']['coordinate']['latitude']
+                        lon = restaurant['location']['coordinate']['longitude']
 
-def get_opentable_results():
-    chicago_ot_restaurants = []
-    for pagenum in range(8):
-        url = 'https://opentable.herokuapp.com/api/restaurants?city=Chicago&per_page=100&page=' + str(pagenum)
-        response = requests.get(url)
-        chicago_ot = response.json()
-        chicago_ot_restaurants.append(chicago_ot['restaurants'])
+                        query = str.replace(address, ' ', '+')
+                        search_url = 'https://maps.googleapis.com/maps/api/place/textsearch/json?location=' \
+                        + str(lat) + ','+ str(lon) + '&query=' + query +'&type=restaurant&key=' + google_API_key
+                        
+                        response = requests.get(search_url)
+                        search = response.json()
+                        if len(search['results']) > 0:
+                            place_id = search['results'][0]['place_id']
+                            
+                            insert = 'placeid=%s' % place_id
+                            url = 'https://maps.googleapis.com/maps/api/place/details/json?'+ insert +'&key=' + google_API_key
+                            a = requests.get(url)
+                            obj = a.json()
+                            if 'result' in obj:
+                                if 'reviews' in obj['result']:
+                                    reviews = obj['result']['reviews']
+                                    for review in reviews:
+                                        review_index[restaurant_name].append(review['text'])
+              
+                                
+    return review_index
 
-    chicago_ot_restaurants = [dic for i in range(8) for dic in chicago_ot_restaurants[i]]
-
-    return chicago_ot_restaurants
 
 
 def get_google_results(lat,lon, address):
@@ -114,19 +122,33 @@ def get_google_results(lat,lon, address):
         obj = a.json()
         
         result= obj['result']
-    
+        google_index['reviews'] = None
+        if 'reviews' in result:
+            reviews = result['reviews']
+            rv = []
+            for review in reviews:
+                rv.append(review['text'])
         
-        reviews = result['reviews']
-        rv = []
-        for review in reviews:
-            rv.append(review['text'])
-        
-        google_index['reviews'] = rv
-        google_index['price'] = result['price_level']
+            google_index['reviews'] = rv
+        google_index['price'] = None
+        if 'price_level' in result:
+            google_index['price'] = result['price_level']
         google_index['hours'] = {}
-        google_index['hours']['periods'] = result['opening_hours']['periods']
-        google_index['hours']['days'] = result['opening_hours']['weekday_text']
+        if 'opening_hours' in result:
+            google_index['hours']['periods'] = result['opening_hours']['periods']
+            google_index['hours']['weekdays'] = result['opening_hours']['weekday_text']
+        '''
+        periods = result['opening_hours']['periods']
+        weekday = result['opening_hours']['weekday_text']
+        periods_extracted = [None] * 7
+        for i in list(range(len(periods))):
+            open_time = periods[i]['open']['time']
+            close_time = periods[i]['close']['time']
+            periods_extracted[i] = (open_time, close_time)
 
+        for i in list(range(len(weekday))):
+            google_index['hours'][weekday[i][0:3]] = periods_extracted[i]
+        '''
         return google_index
     else:
         return None
@@ -142,13 +164,14 @@ def get_large_index(yelp_results):
 
     for call in yelp_results:
         if 'error' not in call:
-            restaurant = call['businesses']
+            restaurants = call['businesses']
             for restaurant in restaurants:
                 if restaurant['is_closed'] == False:
                     restaurant_name = restaurant['name']
                     restaurant_index[restaurant_name] = {}
                     restaurant_index[restaurant_name]['rating'] = restaurant['rating']
-                    restaurant_index[restaurant_name]['cuisine'] = [category[0] for category in restaurant['categories']]
+                    if 'categories' in restaurant:
+                        restaurant_index[restaurant_name]['cuisine'] = [category[0] for category in restaurant['categories']]
                     restaurant_index[restaurant_name]['location'] = {}
                     if len(restaurant['location']['address']) > 0:
                         restaurant_index[restaurant_name]['location']['address'] = restaurant['location']['address'][0]
@@ -158,24 +181,61 @@ def get_large_index(yelp_results):
                         restaurant_index[restaurant_name]['location']['longitude'] = restaurant['location']['coordinate']['longitude']
                         lon = restaurant_index[restaurant_name]['location']['longitude']
                         google = get_google_results(lat, lon, add)
-                        restaurant_index[restaurant_name]['price'] = google['price']
-                        restaurant_index[restaurant_name]['hours'] - google['hours']
-                        cleaned = []
-                        for review in google['reviews']:
-                            clean = clean_up_review(review)
-                            cleaned.append(clean)
-                        restaurant_index[restaurant_name]['reviews'] = cleaned
+                        if google == None:
+                            add = restaurant['ot_address']
+                            google = get_google_results(lat, lon, add)
+                            if google == None:
+                                restaurant_index[restaurant_name]['price'] = None
+                                restaurant_index[restaurant_name]['hours'] = None
+                                restaurant_index[restaurant_name]['reviews'] = None
+                            else:
+                                restaurant_index[restaurant_name]['price'] = google['price']
+                                restaurant_index[restaurant_name]['hours'] = google['hours']
+                        else:
+                            restaurant_index[restaurant_name]['price'] = google['price']
+                            restaurant_index[restaurant_name]['hours'] = google['hours']
 
+                                
     
-
     return restaurant_index
 
 
+'''
+def yelp_results():
+    
+    # Makes multiple API calls (20 results each) and returns list of api calls
+    
+    consumer_key = "MTzuVjKQZCEcQAqcJR4PuA"
+    consumer_secret = "VIKI3HCnTitDaFWGV-rgpmMMRH0"
+    token = "T6KDelwf6GY9lDuegylzmBohFjAabmKl"
+    token_secret = "bJF2MqIjjQm-V2Pe35awiea6MFQ"
+
+    session = rauth.OAuth1Session(
+        consumer_key = consumer_key, consumer_secret = consumer_secret, access_token = token, 
+        access_token_secret = token_secret)
+
+    params = {}
+    params['category_filter'] = 'restaurants'
+    params['location'] = 'Chicago'
+    params['offset'] = 0
+    api_calls = []
+
+    request = session.get('http://api.yelp.com/v2/search', params = params)
+
+    while params['offset'] < 1000:
+    
+        params['offset'] += 20
+        request = session.get('http://api.yelp.com/v2/search', params = params)
+        api_calls.append(request.json())
+   
+    session.close()
+    return api_calls
+'''
 
 
 if __name__ == "__main__":
     
     chicago_ot_restaurants = get_opentable_results()
-    chicago_yelp_restaurants = yelp_results()
+    chicago_yelp_restaurants = get_yelp_results()
     chicago_google_restaurants = get_google_results
     sample_data = get_large_index(chicago_yelp_restaurants)
