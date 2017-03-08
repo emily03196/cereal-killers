@@ -30,7 +30,6 @@ waiting_n = [' wait ', 'waited', 'long', 'slow', 'busy']
 #Environment
 environment = ['ambience', 'atmosphere', 'decor', 'decoration', 'vibe', 'trendy', 'inviting', 'warm']
 
-
 def count_keywords(reviews):
     dietary_dic = {}
     service_score = 0
@@ -62,9 +61,9 @@ def count_keywords(reviews):
 
 '''
 def clean_up_review(reviews):
-    '''
+    
     List of review strings
-    '''
+    
     for review in reviews:
         remove_punctuation = re.compile('[%s\d]' % re.escape(string.punctuation))
         review = remove_punctuation.sub('', review).lower()
