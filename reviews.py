@@ -9,15 +9,6 @@ from nltk.sentiment.util import *
 from nltk.sentiment.vader import SentimentIntensityAnalyzer
 from nltk import tokenize
 
-'''
-for sentence in sentences:
-...     print(sentence)
-...     ss = sid.polarity_scores(sentence)
-...     for k in sorted(ss):
-...         print('{0}: {1}, '.format(k, ss[k]), end='')
-...     print()
-'''
-
 REMOVE_WORDS = ['the', 'a', 'an', 'but', 'if', 'so', 'they', 'them', 'is', 'and', 'to', 'of',\
  'for', 'it', '', 'very', 'their', 'this', 'i', 'my', 'are']
 
