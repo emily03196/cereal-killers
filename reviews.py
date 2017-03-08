@@ -2,6 +2,20 @@ import re
 import string
 import sys
 from collections import Counter
+from nltk.classify import NaiveBayesClassifier
+from nltk.corpus import subjectivity
+from nltk.sentiment import SentimentAnalyzer
+from nltk.sentiment.util import *
+from nltk.sentiment.vader import SentimentIntensityAnalyzer
+from nltk import tokenize
+
+
+for sentence in sentences:
+...     print(sentence)
+...     ss = sid.polarity_scores(sentence)
+...     for k in sorted(ss):
+...         print('{0}: {1}, '.format(k, ss[k]), end='')
+...     print()
 
 REMOVE_WORDS = ['the', 'a', 'an', 'but', 'if', 'so', 'they', 'them', 'is', 'and', 'to', 'of',\
  'for', 'it', '', 'very', 'their', 'this', 'i', 'my', 'are']
@@ -12,22 +26,22 @@ positive_words = ['good', 'best', 'great', 'outstanding', 'excellent', 'amazing'
 'wonderful', 'magnificent', 'awesome', 'perfect']
 negative_words = ['bad', 'worst', 'mediocre', 'horrible', 'terrible']
 
-#Service
-#positive
+# Service
+# positive
 service_p = ['friendly', 'courteous', 'accommodating', 'professional', 'attentive', 'delightful', \
 'helpful', 'passionate', 'welcoming', 'efficient', 'kind']
 service_p = service_p + [word+' service' for word in positive_words] + \
 [word+' waiter' for word in positive_words] + [word+' waitress' for word in positive_words]
-#negative
+# negative
 service_n = ['disregard', 'ignore', 'rude', 'mess'] 
 service_n = service_n + [word+' service' for word in negative_words] + \
 [word+' waiter' for word in negative_words] + [word+' waitress' for word in negative_words]
 
-#Waiting time
+# Waiting time
 waiting_p = ['fast', 'quick']
 waiting_n = [' wait ', 'waited', 'long', 'slow', 'busy']
 
-#Environment
+# Environment
 environment = ['ambience', 'atmosphere', 'decor', 'decoration', 'vibe', 'trendy', 'inviting', 'warm']
 
 def count_keywords(reviews):
@@ -37,6 +51,7 @@ def count_keywords(reviews):
     music = 0
     sight = 0
     environment = 0
+
     for review in reviews:
         for dietary_choice in dietary_choices:
             if dietary_choice in review:
@@ -58,6 +73,23 @@ def count_keywords(reviews):
 
     return {'dietary_restriction': dietary_dic, 'service_score': service_score, \
     'waiting_score': waiting_score, 'music': music, 'sight': sight, 'environment': environment}
+
+
+def determine_sentiment(reviews):
+    '''
+    Hutto, C.J. & Gilbert, E.E. (2014). 
+    VADER: A Parsimonious Rule-based Model for Sentiment Analysis of Social Media Text. 
+    Eighth International Conference on Weblogs and Social Media (ICWSM-14). Ann Arbor, MI, June 2014.
+    '''
+    for review in reviews:
+        print(review)
+        sid = SentimentIntensityAnalyzer()
+        ss = sid.polarity_scores(review)
+        for k in sorted(ss):
+            print('{0}: {1}, '.format(k, ss[k]), end='')
+        print()
+
+
 
 '''
 def clean_up_review(reviews):
