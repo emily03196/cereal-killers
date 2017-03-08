@@ -9,13 +9,14 @@ from nltk.sentiment.util import *
 from nltk.sentiment.vader import SentimentIntensityAnalyzer
 from nltk import tokenize
 
-
+'''
 for sentence in sentences:
 ...     print(sentence)
 ...     ss = sid.polarity_scores(sentence)
 ...     for k in sorted(ss):
 ...         print('{0}: {1}, '.format(k, ss[k]), end='')
 ...     print()
+'''
 
 REMOVE_WORDS = ['the', 'a', 'an', 'but', 'if', 'so', 'they', 'them', 'is', 'and', 'to', 'of',\
  'for', 'it', '', 'very', 'their', 'this', 'i', 'my', 'are']
@@ -48,9 +49,9 @@ def count_keywords(reviews):
     dietary_dic = {}
     service_score = 0
     waiting_score = 0
-    music = 0
-    sight = 0
-    environment = 0
+    music_score = 0
+    sight_score = 0
+    environment_score = 0
 
     for review in reviews:
         for dietary_choice in dietary_choices:
@@ -65,14 +66,15 @@ def count_keywords(reviews):
         if any(word in review for word in waiting_n):
             waiting_score -= 1
         if 'music' in review:
-            music += 1
+            music_score += 1
         if 'sight' in review:
-            sight += 1
+            sight_score += 1
         if any(word in review for word in environment):
-            environment += 1
+            environment_score += 1
 
     return {'dietary_restriction': dietary_dic, 'service_score': service_score, \
-    'waiting_score': waiting_score, 'music': music, 'sight': sight, 'environment': environment}
+    'waiting_score': waiting_score, 'music': music_score, 'sight': sight_score, \
+    'environment': environment_score}
 
 
 def determine_sentiment(reviews):
