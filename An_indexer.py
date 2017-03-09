@@ -11,15 +11,6 @@ yelp = 'yelp_dic.json'
 ot_file = 'ot_data.json'
 
 
-with open(reviews_file, 'r') as f:
-    data = f.read()
-reviews_index = json.loads(data)
-
-for restaurant in reviews_index:
-    re = reviews_index[restaurant]
-    for review in re:
-        review = review.replace('\n', '')
-
 
 with open(ph_file, 'r') as f:
     data = f.read()
@@ -37,14 +28,8 @@ with open('big_google.json', 'r') as f:
     data = f.read()
 google_results = json.loads(data)
 
-def parse_reviews():
-    '''
-    Parse reviews and count keywords to address user's specific requirements
-    '''
-    parsed = {}
-    for restaurant in reviews_index:
-        parsed[restaurant] = reviews.count_keywords(reviews_index[restaurant])
-    return parsed
+sentiment_dic = reviews.determine_sentiment('full_reviews.json')
+
 
 def get_ot_dic():
     ot_dic = {}
@@ -92,6 +77,8 @@ def get_large_index():
                         day = entry['open']['day']
                         hours_dic[weekday_dic[day]] = (entry['open']['time'], entry['close']['time'])
                 restaurant_index[call]['hours'] = hours_dic
+            if call in sentiment_dic:
+                restaurant_index[call]['analyzed_reviews'] = sentiment_dic[call]
 
             
                   
@@ -100,7 +87,7 @@ def get_large_index():
 
 
 if __name__ == "__main__":
-    
-    parsed_reviews = parse_reviews()
+
     ot_dic = get_ot_dic()
     main_index = get_large_index()
+    sentiments = sentiment_dic
