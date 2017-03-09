@@ -6,12 +6,12 @@ from geopy.geocoders import Nominatim
 geolocator = Nominatim()
 from geopy.distance import vincenty
 import re
-import final_indexer
+import An_indexer
 
 day_dic = {'Sunday': 0, 'Monday': 1, 'Tuesday': 2, 'Wednesday': 3, 'Thursday': 4, \
 'Friday': 5, 'Saturday': 6}
 
-parsed_reviews = final_indexer.parse_reviews()
+parsed_reviews = An_indexer.parse_reviews()
 reviews_file = 'full_reviews.json'
 ph_file = 'google_ph.json'
 yelp = 'yelp_data.json'
@@ -24,7 +24,7 @@ ph_index = json.loads(data)
 with open(yelp, 'r') as f:
     data = f.read()
 yelp_results = json.loads(data)
-data_dic = final_indexer.get_large_index(parsed_reviews, ph_index, yelp_results)
+data_dic = An_indexer.get_large_index(parsed_reviews, ph_index, yelp_results)
 
 been_to_dic = {'Yusho': 4, 'bellyQ': 3, 'Chicago Peoples Temple': 5, 'Dine': 4}
 address = '6031 South Ellis Ave'
@@ -32,7 +32,7 @@ max_distance = 20
 dietary_restriction = ['Vegetarian']
 time = 'Monday 1800'
 username = 'Liz'
-keywords = []
+keywords = {'environment': None, 'service': None, 'waiting': None}
 
 
 class User:
@@ -41,16 +41,16 @@ class User:
     
     def __init__(self, username, address, time, dietary_restriction, max_distance, been_to_dic, \
         keywords):
-        self.user_lat = None
-        self.user_lon = None
-        self.max_distance = None
-        self.address = address
+        self.user_lat = None #None or numerical
+        self.user_lon = None #None or numerical
+        self.max_distance = None #None or numerical
+        self.address = address #None or string
         self.dietary_restriction = []
-        self.keywords = []
-        self.day = None
-        self.hour = None
+        self.keywords = {} #dictionary
+        self.day = None #None or string
+        self.hour = None #None or string
 
-        if address:
+        if address: 
             location = geolocator.geocode(address)
             self.user_lat = location.latitude
             self.user_lon = location.longitude
@@ -119,11 +119,9 @@ class User:
         cuisine_preference_dic = {}
         price_lst =[]
         score_lst = []
-        #size = 0 #records the occurence of cuisines with repeition
         for restaurant, score in self.been_to_dic.items():
             price_lst.append(self.data_dic[restaurant].get('price', 0))
             cuisine_lst = self.data_dic[restaurant].get('cuisine', [])
-            #size += len(cuisine_lst)
             score_lst = score_lst + [score] * len(cuisine_lst)
             for cuisine in cuisine_lst:
                 cuisine_preference_dic[cuisine] = cuisine_preference_dic.get(cuisine, 0) + score
@@ -145,19 +143,20 @@ class User:
             cuisine_lst = sub_dic.get('cuisine', [])
             cuisine_score = 0
             dietary_restriction_multiplier = 1
-            keywords_score = 0
-
+            keywords_multiplier = 1
             if 'parsed_reviews' in sub_dic:
                 reviews = sub_dic['parsed_reviews']
-                for restriction in dietary_restriction:
-                    dietary_restriction_multiplier += reviews['dietary_restriction'].get(restriction, 0) / 5
-                #for keywords in self.keywords:
-                    #keywords_score += reviews.get(keyword, 0) / 5
+                for restriction in self.dietary_restriction:
+                    if restriction in reviews.get('dietary_choices', []):
+                        dietary_restriction_multiplier += 1/5
+                for keyword, value in keywords:
+                    if value is True:
+                        keywords_multiplier += reviews.get(keyword+'_score', 0)
             if len(cuisine_lst) > 0:
                 for cuisine in cuisine_lst:                    
                     cuisine_score += self.cuisine_preference_dic.get(cuisine, 0)#It is possible that 'vegetarian' shows up in the cuisine list but not in the reviews
                 cuisine_score = 5 * cuisine_score / len(cuisine_lst)            
-            price = sub_dic.get('price', 0) #needs price in data
+            price = sub_dic.get('price', 0)
             price_score = 4 - abs(self.avg_price - price)
             rating_score = sub_dic['rating']
             distance = sub_dic['distance']
@@ -166,16 +165,16 @@ class User:
                 been_to_score = 1
             # round the sum of cuisine score and price score to the nearest integer
             recommendation_lst.append({'restaurant': restaurant, 'cuisine_score':cuisine_score, \
-                'price_score': price_score, 'rating_score': rating_score, 'keywords_score': \
-                keywords_score, 'distance': distance, 'been_to_score': been_to_score, \
+                'price_score': price_score, 'rating_score': rating_score, 'keywords_multiplier': \
+                keywords_multiplier, 'distance': distance, 'been_to_score': been_to_score, \
                 'cuisine_lst': cuisine_lst, 'price': price, 'dietary_restriction_multiplier': \
                 dietary_restriction_multiplier, 'address': address, 'phone': phone})
         
         recommendation_lst = sorted(sorted(sorted(sorted(sorted(recommendation_lst, \
             key=lambda item:item['distance']), key=lambda item:item['keywords_score'], \
         reverse=True),key=lambda item:item['rating_score'], reverse=True), key=lambda \
-        item:round(item['cuisine_score']*item['dietary_restriction_multiplier']+item['price_score'], \
-            0), reverse=True), key=lambda item:item['been_to_score'])
+        item:round(item['cuisine_score']*item['dietary_restriction_multiplier']*item['keywords_multiplier']\
+            +item['price_score'], 0), reverse=True), key=lambda item:item['been_to_score'])
         
         if len(recommendation_lst) == 0:
             return 'No Options', recommendation_lst
@@ -208,11 +207,11 @@ class User:
                 recommendation_lst = [recommendation for recommendation in recommendation_lst if \
                 recommendation['price'] > rejected_price]
             
-            recommendation_lst = sorted(sorted(sorted(sorted(sorted(recommendation_lst, 
-                key=lambda item:item['distance']), key=lambda item:item['keywords_score'], 
-            reverse=True),key=lambda item:item['rating_score'], reverse=True), key=lambda 
-            item:round(item['cuisine_score']*item['dietary_restriction_multiplier']+item['price_score'], \
-            0), reverse=True), key=lambda item:item['been_to_score'])            
+            recommendation_lst = sorted(sorted(sorted(sorted(sorted(recommendation_lst, \
+                key=lambda item:item['distance']), key=lambda item:item['keywords_score'], \
+            reverse=True),key=lambda item:item['rating_score'], reverse=True), key=lambda \
+            item:round(item['cuisine_score']*item['dietary_restriction_multiplier']*item['keywords_multiplier']\
+                +item['price_score'], 0), reverse=True), key=lambda item:item['been_to_score'])           
 
             return recommendation_lst[0], recommendation_lst
 
