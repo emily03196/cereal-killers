@@ -8,7 +8,6 @@ from nltk.sentiment.vader import SentimentIntensityAnalyzer
 REMOVE_WORDS = ['the', 'a', 'an', 'but', 'if', 'so', 'they', 'them', 'is', 'and', 'to', 'of',\
  'for', 'it', '', 'very', 'their', 'this', 'i', 'my', 'are', 'be', 'was', 'were', 'in', 'as']
 
-
 # Modifiers
 positive_words = ['good', 'best', 'great', 'outstanding', 'excellent', 'amazing', 'spectacular', \
     'wonderful', 'magnificent', 'awesome', 'perfect', 'phenomenal', 'cool', 'favorite', 'fantastic', \
@@ -163,8 +162,8 @@ def count_keywords(reviews):
             waiting_score += scores_pairs[1]
             environment_score += scores_pairs[2]
 
-    return {'dietary_choices': list(dietary_concerns), 'service_score': service_score, \
-    'waiting_score': waiting_score, 'environment_score': environment_score}
+    return {'dietary_choices': list(dietary_concerns), 'service_score': service_score / len(reviews), \
+    'waiting_score': waiting_score / len(reviews), 'environment_score': environment_score / len(reviews)}
 
 
 def determine_sentiment(json_filename):
