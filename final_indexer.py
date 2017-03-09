@@ -87,3 +87,5 @@ if __name__ == "__main__":
     
     parsed_reviews = parse_reviews()
     main_index = get_large_index(parsed_reviews, ph_index, yelp_results)
+
+main_index = get_large_index(parsed_reviews, ph_index, yelp_results)
