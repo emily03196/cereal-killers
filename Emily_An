@@ -31,6 +31,37 @@ def get_opentable_results():
 
     return chicago_ot_restaurants
 
+def get_google():
+    '''
+    Using the dictionary built from the Yelp API, make calls to the Google Places API 
+    '''
+    google_index = {}
+
+    for call in chicago_ot_restaurants:
+        address = call['address']
+        lat = call['lat']
+        lon = call['lng']
+
+
+        query = str.replace(address, ' ', '+')
+        search_url = 'https://maps.googleapis.com/maps/api/place/textsearch/json?location=' \
+        + str(lat) + ','+ str(lon) + '&query=' + query +'&type=restaurant&key=' + google_API_key
+                        
+        response = requests.get(search_url)
+        search = response.json()
+        if len(search['results']) > 0:
+            place_id = search['results'][0]['place_id']
+            
+            insert = 'placeid=%s' % place_id
+            url = 'https://maps.googleapis.com/maps/api/place/details/json?'+ insert +'&key=' + google_API_key
+            a = requests.get(url)
+            obj = a.json()
+            if 'result' in obj:
+                google_index[call['name']] = obj['result']      
+                                
+    return google_index
+
+
 
 def get_yelp_results():
     '''
@@ -45,7 +76,7 @@ def get_yelp_results():
         consumer_key = consumer_key, consumer_secret = consumer_secret, access_token = token, 
         access_token_secret = token_secret)
 
-    final_results = []
+    final_results = {}
     for restaurant in chicago_ot_restaurants:
         first = restaurant['phone'].replace('-', '')
         second = restaurant['phone'].replace('x', '')
@@ -56,8 +87,7 @@ def get_yelp_results():
 
         request = session.get('https://api.yelp.com/v2/phone_search', params = params)
         results = request.json()
-        results['ot_address'] = restaurant['address']
-        final_results.append(results)
+        final_results[restaurant['name']] = results
 
     session.close()
     return final_results
@@ -144,6 +174,9 @@ def get_google_prices_hours(data):
                                     ph_index[restaurant_name]['hours'] = obj['result']['opening_hours']
                                                       
     return ph_index
+
+
+
 
 
 

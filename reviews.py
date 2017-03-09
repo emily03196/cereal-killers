@@ -1,109 +1,182 @@
 import re
 import string
 import sys
+import json
 from collections import Counter
-from nltk.classify import NaiveBayesClassifier
-from nltk.corpus import subjectivity
-from nltk.sentiment import SentimentAnalyzer
-from nltk.sentiment.util import *
 from nltk.sentiment.vader import SentimentIntensityAnalyzer
-from nltk import tokenize
 
 REMOVE_WORDS = ['the', 'a', 'an', 'but', 'if', 'so', 'they', 'them', 'is', 'and', 'to', 'of',\
- 'for', 'it', '', 'very', 'their', 'this', 'i', 'my', 'are']
+ 'for', 'it', '', 'very', 'their', 'this', 'i', 'my', 'are', 'be', 'was', 'were', 'in', 'as']
 
-dietary_choices = ['vegetarian', 'vegan', 'gluten-free', 'halal', 'kosher']
-
+# Modifiers
 positive_words = ['good', 'best', 'great', 'outstanding', 'excellent', 'amazing', 'spectacular', \
-'wonderful', 'magnificent', 'awesome', 'perfect']
-negative_words = ['bad', 'worst', 'mediocre', 'horrible', 'terrible']
+    'wonderful', 'magnificent', 'awesome', 'perfect', 'phenomenal', 'cool', 'favorite', 'fantastic', \
+    'fun', 'great', 'delightful', 'nice', 'love', 'loved']
 
-# Service
-# positive
-service_p = ['friendly', 'courteous', 'accommodating', 'professional', 'attentive', 'delightful', \
-'helpful', 'passionate', 'welcoming', 'efficient', 'kind']
-service_p = service_p + [word+' service' for word in positive_words] + \
-[word+' waiter' for word in positive_words] + [word+' waitress' for word in positive_words]
-# negative
-service_n = ['disregard', 'ignore', 'rude', 'mess'] 
-service_n = service_n + [word+' service' for word in negative_words] + \
-[word+' waiter' for word in negative_words] + [word+' waitress' for word in negative_words]
-
-# Waiting time
-waiting_p = ['fast', 'quick']
-waiting_n = [' wait ', 'waited', 'long', 'slow', 'busy']
-
-# Environment
-environment = ['ambience', 'atmosphere', 'decor', 'decoration', 'vibe', 'trendy', 'inviting', 'warm']
-
-def count_keywords(reviews):
-    dietary_dic = {}
-    service_score = 0
-    waiting_score = 0
-    music_score = 0
-    sight_score = 0
-    environment_score = 0
-
-    for review in reviews:
-        for dietary_choice in dietary_choices:
-            if dietary_choice in review:
-                dietary_dic[dietary_choice] = dietary_dic.get(dietary_choice, 0) + 1
-        if any(word in review for word in service_p):
-            service_score += 1
-        if any(word in review for word in service_n):
-            service_score -= 1
-        if any(word in review for word in waiting_p):
-            waiting_score += 1
-        if any(word in review for word in waiting_n):
-            waiting_score -= 1
-        if 'music' in review:
-            music_score += 1
-        if 'sight' in review:
-            sight_score += 1
-        if any(word in review for word in environment):
-            environment_score += 1
-
-    return {'dietary_restriction': dietary_dic, 'service_score': service_score, \
-    'waiting_score': waiting_score, 'music': music_score, 'sight': sight_score, \
-    'environment': environment_score}
+negative_words = ['bad', 'worst', 'mediocre', 'horrible', 'terrible', 'sad', 'disappointing']
 
 
-def determine_sentiment(reviews):
+# Dietary Restrictions
+dietary_choices = ['vegetarian', 'vegan', 'gluten-free', 'halal', 'kosher', 'paleo', 'allergies', 'allergy']
+
+
+# Service Related 
+service_pos = ['friendly', 'courteous', 'accommodating', 'professional', 'attentive', \
+    'helpful', 'passionate', 'welcoming', 'efficient', 'kind', 'fast', 'quick', 'immediate']
+service_neg = ['disregard', 'ignored', 'rude', 'mess', 'mean', 'slow'] 
+service = ['service', 'waiter', 'waitress', 'staff']
+
+service_p = [word + ' ' + serv for word in positive_words for serv in service] + \
+    [serv + ' ' + word for word in positive_words for serv in service]
+service_n = [word + ' ' + serv for word in negative_words for serv in service] + \
+    [serv + ' ' + word for word in negative_words for serv in service]
+
+
+# Wait Time Related
+waiting_pos = ['fast', 'quick', 'short', 'immediate']
+waiting_neg = ['long', 'slow', 'busy', 'wait']
+waiting = ['time', 'wait', 'waited']
+
+waiting_p = [word + ' ' + wait for word in waiting_pos for wait in waiting] + \
+    [wait + ' ' + word for word in waiting_pos for wait in waiting]
+waiting_n = [word + ' ' + wait for word in waiting_neg for wait in waiting] + \
+    [wait + ' ' + word for word in waiting_neg for wait in waiting]
+
+
+# Environment 
+environment_pos = ['warm', 'trendy', 'stylish', 'inviting', 'cozy', 'intimate']
+environment_neg = ['cold', 'chilly', 'dirty', 'noisy', 'ugly']
+environment = ['ambience', 'atmosphere', 'decor', 'decoration', 'vibe', 'location', 'interior', 'views']
+
+environment_p = [word + ' ' + env for word in positive_words for env in environment] + \
+    [env + ' ' + word for word in positive_words for env in environment]
+environment_n = [word + ' ' + env for word in negative_words for env in environment] + \
+    [env + ' ' + word for word in negative_words for env in environment]
+
+
+def find_sentiment(words):
     '''
     Hutto, C.J. & Gilbert, E.E. (2014). 
     VADER: A Parsimonious Rule-based Model for Sentiment Analysis of Social Media Text. 
     Eighth International Conference on Weblogs and Social Media (ICWSM-14). Ann Arbor, MI, June 2014.
+
+    Determines sentiment of words (string) input via NLTK's Vader SentimentIntensityAnalyzer
     '''
-    for review in reviews:
-        print(review)
-        sid = SentimentIntensityAnalyzer()
-        ss = sid.polarity_scores(review)
-        for k in sorted(ss):
-            print('{0}: {1}, '.format(k, ss[k]), end='')
-        print()
+    sentiment_score = 0
+
+    sid = SentimentIntensityAnalyzer()
+    ss = sid.polarity_scores(words)
+    sentiment_score = sentiment_score + ss['compound']
+
+    return sentiment_score
 
 
+def cleanup_reviews(review):
+    '''
+    Returns list of unique words and combinations of pairs from review string
+    '''
+    remove_punctuation = re.compile('[%s\d]' % re.escape(string.punctuation))
+    review = remove_punctuation.sub('', review).lower()
+    review_list = review.split(' ')
+    review_list = [word for word in review_list if word not in REMOVE_WORDS]
+    review_words = list(set(review_list))
 
-'''
-def clean_up_review(reviews):
+    review_pairs_count = Counter(zip(review_list, review_list[1:]))
+    pairs = review_pairs_count.most_common()
+    pairs = sorted(pairs, key=lambda x: x[1], reverse = True)
+    word_pairs = [pair[0][0] + ' ' + pair[0][1] for pair in pairs]
+
+    return review_words, word_pairs
+
+
+def keyword_analysis(word):
+    '''
+    Determines sentiment of string input based on categorization
+    '''
+    service_score = 0
+    waiting_score = 0
+    environment_score = 0
     
-    List of review strings
+    if word in service_pos:
+        service_score += find_sentiment(word)
+    elif word in service_neg:
+        service_score += find_sentiment(word)
+    if word in waiting_pos:
+        waiting_score += 0.33
+    elif word in waiting_neg:
+        waiting_score += -0.33
+    if word in environment_pos:
+        environment_score += find_sentiment(word)
+    elif word in environment_neg:
+        environment_score += find_sentiment(word)
+
+    return (service_score, waiting_score, environment_score)
+
+
+def keypair_analysis(pair):
+    '''
+    Determines sentiment of string input based on categorization
+    '''
+    service_score = 0
+    waiting_score = 0
+    environment_score = 0
     
+    if pair in service_p:
+        service_score += find_sentiment(pair)
+    elif pair in service_n:
+        service_score += find_sentiment(pair)
+    if pair in waiting_p:
+        waiting_score += 0.5
+    elif pair in waiting_n:
+        waiting_score += -0.5
+    if pair in environment_p:
+        environment_score += find_sentiment(pair)
+    elif pair in environment_n:
+        environment_score += find_sentiment(pair)
+
+    return (service_score, waiting_score, environment_score)
+
+
+def count_keywords(reviews):
+    '''
+    Determines dietary restrictions and individual scores for service, 
+    waiting, and environment based on review strings
+    '''
+    dietary_concerns = set()
+    service_score = 0
+    waiting_score = 0
+    environment_score = 0
+
     for review in reviews:
-        remove_punctuation = re.compile('[%s\d]' % re.escape(string.punctuation))
-        review = remove_punctuation.sub('', review).lower()
-        review_list = review.split(' ')
-        review_list = [word for word in review_list if word not in REMOVE_WORDS]
+        review_words, word_pairs = cleanup_reviews(review)
+        for word in review_words:
+            if word in dietary_choices:
+                dietary_concerns.add(word)
+            scores_words = keyword_analysis(word)
+            service_score += scores_words[0]
+            waiting_score += scores_words[1]
+            environment_score += scores_words[2]
+        for pair in word_pairs:
+            scores_pairs = keypair_analysis(pair)
+            service_score += scores_pairs[0]
+            waiting_score += scores_pairs[1]
+            environment_score += scores_pairs[2]
 
-        review_words_count = Counter(review_list)
-        words = review_words_count.most_common(5)
-        top_words = [words[i] for i in range(len(words))]
-        top_words = sorted(top_words, key=lambda x: x[1], reverse = True)
+    return {'dietary_choices': list(dietary_concerns), 'service_score': service_score / len(reviews), \
+    'waiting_score': waiting_score / len(reviews), 'environment_score': environment_score / len(reviews)}
 
-        review_pairs_count = Counter(zip(review_list, review_list[1:]))
-        pairs = review_pairs_count.most_common(20)
-        top_pairs = [pairs[i] for i in range(len(pairs))]
-        top_pairs = sorted(top_pairs, key=lambda x: x[1], reverse = True)
 
-    return top_words, top_pairs
-'''
+def determine_sentiment(json_filename):
+    '''
+    Assigns score dictionary to each individual restaurant based on json file
+    '''
+    with open(json_filename) as reviews_file:    
+        reviews = json.load(reviews_file)
+
+    sentiment_scores = {}
+    
+    for restaurant in reviews:
+        if len(reviews[restaurant]) != 0:
+            sentiment_scores[restaurant] = count_keywords(reviews[restaurant])
+
+    return sentiment_scores
