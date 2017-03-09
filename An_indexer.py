@@ -5,7 +5,7 @@ import json
 
 #Read in Yelp and Google Places data previously stored from API calls
 
-reviews_file = 'full_reviews.json'
+
 ph_file = 'google_ph.json'
 yelp = 'yelp_dic.json'
 ot_file = 'ot_data.json'
@@ -28,7 +28,11 @@ with open('big_google.json', 'r') as f:
     data = f.read()
 google_results = json.loads(data)
 
-sentiment_dic = reviews.determine_sentiment('full_reviews.json')
+with open('sentiment_dic.json', 'r') as f:
+    data = f.read()
+sentiment_dic = json.loads(data)
+
+
 
 
 def get_ot_dic():
@@ -79,6 +83,7 @@ def get_large_index():
                 restaurant_index[call]['hours'] = hours_dic
             if call in sentiment_dic:
                 restaurant_index[call]['analyzed_reviews'] = sentiment_dic[call]
+            
 
             
                   
@@ -90,4 +95,4 @@ if __name__ == "__main__":
 
     ot_dic = get_ot_dic()
     main_index = get_large_index()
-    sentiments = sentiment_dic
+    
