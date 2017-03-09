@@ -5,30 +5,85 @@ import numpy as np
 import csv
 
 '''
-User input:
-1) A dictionary of restaurants (string) he's been to and rated
-    keys: restaurant names
-    values: scores
-2) A dictionary with the following keys 'user_lat', 'user_long', 'max_distance'. 
-Things we have:
-A list of restaurant names (string)
-A dictionary of dictionaries with restaurant names as keys, then each sub-dictionary containes the following keys 'cuisine' (a list of strings), 'price' (a value 1-4), 'location' (a dictionary 'address', latitude', 'longitude'), 'rating.
-Review catalog: list of tuples (restaurant name, word)
+Data:
+1) A dictionary of dictionaries with restaurant names as keys, then each sub-dictionary 
+containes the following keys 'cuisine' (a list of strings), 'price' (a value 0-4), 'location' 
+(a dictionary 'address', latitude', 'longitude'), 'rating', 'hours', 'reviews'.
+2) Review catalog: a dictionary of keys of restaurant names and values of lists of review strings
 '''
-
-been_to_dic = {'Farmhouse': 4, 'Bar on Buena': 3, 'City  Cafe': 4}
-location_requirement_dic = {'user_lat': '41.78502539999999', 'user_lon': '-87.60034869999998', 'max_distance':10}
 data_file = 'sample_data.json'
-user_data = 'user_data.csv'
-
 with open(data_file, 'r') as f:
     data = f.read()
+data = json.loads(data)
 
+'''
+User input:
+1) A dictionary of restaurants (string) he's been to and rated with keys of restaurant names
+   and values of scores (required)
+2) User address (optional, required if maximal distance is entered)
+3) Maximal distance (optional)
+4) Dietary restrictions (optional)
+5) Time (optional)
+6) Username (required)
+'''
+#Test input
+#user_data = 'user_data.csv'
+been_to_dic = {'Yusho': 4, 'bellyQ': 3, 'Xoco': 4}
+address = '6031 South Ellis Ave'
+max_distance = 5
+dietary_restriction = ['Vegetarian', 'Halal']
+time = 'Monday 1800'
+username = 'Liz'
+keywords (optional)
+
+user = Audrey_User.User(username = username, been_to_dic = been_to_dic, address = address, \
+    max_distance = max_distance, time = time, dietary_restriction = dietary_restriction, \
+    keywords = keywords)
+recommendation, recommendation_lst = user.generate_recommendation()
+
+#reject
+if reject == True:
+    recommendation, recommendation_lst = user.reject(recommendation_lst = recommendation_lst, \
+        not_cuisine, price_too_high, price_too_low)
+    
+#accept
+if reject == False:
+    username, been_to_dic, address, recommendation = user.accept(recommendation)
+
+if modify_location is True:
+    self.modify_address(new_address)
+
+if modify_distance is True:
+    self.modify_distance(new_max_distance)
+
+if modify_time is True:
+    self.modify_time(new_time)
+
+if modify_history is True:
+    self.modify_history(new_been_to_dic)
+
+if modify_dietary_restriction is True:
+    self.modify_dietary_restriction(new_dietary_restriction)
+
+if modify_keywords is True:
+    self.modify_keywords(new_keywords)
+
+
+
+
+
+
+
+
+
+
+
+'''
 def retrieve_info(username, user_data):
-    '''
+    
     If the user has an existing account, he can retrieve his been_to_dic and default location data, 
     which automatically show up in the input box
-    '''
+    
     been_to_dic = None
     default_location = None
     with open(user_data, 'r') as user_data:
@@ -38,7 +93,8 @@ def retrieve_info(username, user_data):
                 been_to_dic = row[2]
                 default_location = row[1]
     return been_to_dic, default_location
-
+'''
+'''
 def start(username, location_requirement_dic=None, been_to_dic=None):
     with open(user_data, 'r') as user_data:
         reader = csv.reader(user_data, delimtier = ',')
@@ -54,6 +110,7 @@ def start(username, location_requirement_dic=None, been_to_dic=None):
     print('price', rec[7])
     print('rating', rec[3])
     print('distance', rec[4])
+'''
     
 
 

@@ -83,9 +83,7 @@ def get_large_index(parsed_reviews, ph_index, yelp_results):
     return restaurant_index
 
 
-if __name__ == "__main__":
+#if __name__ == "__main__":
     
-    parsed_reviews = parse_reviews()
-    main_index = get_large_index(parsed_reviews, ph_index, yelp_results)
-
+parsed_reviews = parse_reviews()
 main_index = get_large_index(parsed_reviews, ph_index, yelp_results)
