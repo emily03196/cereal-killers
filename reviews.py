@@ -172,8 +172,8 @@ def determine_sentiment(json_filename):
     '''
     with open(json_filename) as reviews_file:    
         reviews = json.load(reviews_file)
-    for restaurant in reviews_index:
-    re = reviews_index[restaurant]
+    for restaurant in reviews:
+        re = reviews[restaurant]
     for review in re:
         review = review.replace('\n', '')
 
