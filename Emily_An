@@ -61,6 +61,18 @@ def get_google():
                                 
     return google_index
 
+def get_review_dic():
+    review_dic = {}
+    for call in big_google:
+        if 'reviews' in big_google[call]:
+            reviews = big_google[call]['reviews']
+            review_dic[call] = []
+            for review in reviews:
+                review_dic[call].append(review['text'])
+    return review_dic
+
+
+
 
 
 def get_yelp_results():
@@ -79,7 +91,7 @@ def get_yelp_results():
     final_results = {}
     for restaurant in chicago_ot_restaurants:
         first = restaurant['phone'].replace('-', '')
-        second = restaurant['phone'].replace('x', '')
+        second = first.replace('x', '')
         phone_no = second[0:10]
     
         params = {}

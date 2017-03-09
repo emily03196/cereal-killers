@@ -7,7 +7,7 @@ import json
 
 
 ph_file = 'google_ph.json'
-yelp = 'yelp_dic.json'
+yelp = 'final_yelp_dic.json'
 ot_file = 'ot_data.json'
 
 
@@ -85,14 +85,11 @@ def get_large_index():
                 restaurant_index[call]['analyzed_reviews'] = sentiment_dic[call]
             
 
-            
-                  
-
     return restaurant_index
 
 
 if __name__ == "__main__":
 
     ot_dic = get_ot_dic()
-    main_index = get_large_index()
+    main_index3 = get_large_index()
     
