@@ -77,7 +77,7 @@ def cleanup_reviews(review):
     '''
     remove_punctuation = re.compile('[%s\d]' % re.escape(string.punctuation))
     review = remove_punctuation.sub('', review).lower()
-    review_list = review.split(' ')
+    review_list = review.replace('\n', '').split(' ')
     review_list = [word for word in review_list if word not in REMOVE_WORDS]
     review_words = list(set(review_list))
 
@@ -92,6 +92,9 @@ def cleanup_reviews(review):
 def keyword_analysis(word):
     '''
     Determines sentiment of string input based on categorization
+
+    Waiting score is given a +/-0.33 depending on positive or negative
+    review; the sentiment analysis does not properly analyze the waiting set words
     '''
     service_score = 0
     waiting_score = 0
@@ -116,6 +119,9 @@ def keyword_analysis(word):
 def keypair_analysis(pair):
     '''
     Determines sentiment of string input based on categorization
+
+    Waiting score is given a +/-0.5 depending on positive or negative
+    review; the sentiment analysis does not properly analyze the waiting set pairs
     '''
     service_score = 0
     waiting_score = 0
@@ -172,10 +178,6 @@ def determine_sentiment(json_filename):
     '''
     with open(json_filename) as reviews_file:    
         reviews = json.load(reviews_file)
-    for restaurant in reviews:
-        re = reviews[restaurant]
-    for review in re:
-        review = review.replace('\n', '')
 
     sentiment_scores = {}
     
