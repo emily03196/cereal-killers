@@ -1,11 +1,6 @@
-{% if is_registered %} 
-    <script>alert("You have registered with username {{  username_obj  }}")</script>
-{% else %}
-    <form action="/login/" method="post">
+
+<form name="loginform" action="/pandora/login/" method="post">
     {% csrf_token %}
     {{ form }}
     <input type="submit" value="Submit" />
 </form>
-{% endif %}
-
-<li> <a href="/pandora/{{ username_obj }}/"> Continue</a></li>
