@@ -1,7 +1,34 @@
-<p>
-Search up to five restaurants in Chicago that you have previously been to, and liked.
-</p>
+<p><strong>
+    Search up to five restaurants in Chicago that you have previously been to, and liked.
+</strong></p>
 
-<form name='searchrestaurantsform' action='pickrestaurants'>
+<form name='searchrestaurantsform' action='/pandora/searchrestaurants/' method='post'>
     {% csrf_token %}
-    
+    <p>
+    Search #1: 
+    </p>    
+    {{  form.search_query1  }}
+
+    <p>
+    Search #2: 
+    </p>    
+    {{  form.search_query2  }}
+
+    <p>
+    Search #3: 
+    </p>    
+    {{  form.search_query3  }}
+
+    <p>
+    Search #4: 
+   </p>    
+    {{  form.search_query4  }}
+
+    <p>
+    Search #5: 
+    </p>    
+    {{  form.search_query5  }}
+
+    <input type="submit" value="Submit" />
+
+</form>

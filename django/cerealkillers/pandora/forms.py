@@ -1,6 +1,6 @@
 from django import forms
 from django.forms import ModelForm
-from .models import Username, ResponsesModel, SearchResponsesModel
+from .models import Username, ResponsesModel, SearchRestaurantsModel, PickRestaurantsModel, RecommendationModel, RejectionModel, RestartModel
 
 
 class LoginForm(ModelForm): 
@@ -15,6 +15,7 @@ class ResponsesForm(ModelForm):
     class Meta:
         model = ResponsesModel
         fields = ['diet', 'distance', 'address', 'hurry', 'arrival_day', 'arrival_time']
+
     # user_instance = forms.ModelChoiceField(Username, on_delete=models.CASCADE, default=None)
     
     #diet_choices = [(None, None), ("VT", "Vegetarian"),("VG", "Vegan"), ("HL", "Halal"), ("KS", "Kosher"), ("GF", "Gluten-Free")]
@@ -33,7 +34,27 @@ class ResponsesForm(ModelForm):
     #time_label = "What time will you arrive at the restaurant?"
     #time = forms.DateTimeField(required=False, label=time_label)
 
-class SearchResponsesForm(ModelForm):
+class SearchRestaurantsForm(ModelForm):
     class Meta:
-        model = SearchResponsesModel
+        model = SearchRestaurantsModel
         fields = ['search_query1', 'search_query2', 'search_query3', 'search_query4', 'search_query5']
+
+class PickRestaurantsForm(ModelForm):
+    class Meta:
+        model = PickRestaurantsModel
+        fields = ['pick_results1', 'pick_results2', 'pick_results3', 'pick_results4', 'pick_results5']
+
+class RecommendationForm(ModelForm):
+    class Meta:
+        model = RecommendationModel
+        fields = ['accept']
+
+class RejectionForm(ModelForm):
+    class Meta:
+        model = RejectionModel
+        fields = ["cuisine", "price_high", "price_low"]
+
+class ThankYouForm(forms.Form):
+    class Meta:
+        model = RestartModel
+        fields = ['restart']

@@ -1,1 +1,14 @@
-<p>This is the Recommendation page.</p>
+<p> <strong>
+    Here is your Recommendation! </strong></p>
+{{ recommendation }}
+
+<p> Do you accept this recommendation?</p>
+
+<form name='recommendationform' action='/pandora/recommendation/' method='post'>
+
+    {% csrf_token %}
+    {{  form.accept  }}
+
+    <input type="submit" value="Submit" />
+
+</form>

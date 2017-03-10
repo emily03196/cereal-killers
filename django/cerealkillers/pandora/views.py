@@ -1,19 +1,19 @@
 from django.shortcuts import render
 from django.http import HttpResponse, HttpResponseRedirect
 from django.template import loader
-from .models import Username, ResponsesModel
-from .forms import LoginForm, ResponsesForm, SearchResponsesForm
+from .models import Username, ResponsesModel, SearchRestaurantsModel, PickRestaurantsModel, RecommendationModel, RejectionModel, RestartModel
+from .forms import LoginForm, ResponsesForm, SearchRestaurantsForm, PickRestaurantsForm, RecommendationForm, RejectionForm, ThankYouForm
 
 def login(request):
     if request.method == 'POST':
         form = LoginForm(request.POST)
-        form.save()
         if form.is_valid():
+            form.save()
             # user_id = form.cleaned_data['user_id']
             username = form.cleaned_data['username']
             # return HttpResponseRedirect('%s' % username)
             # return HttpResponseRedirect('responses/')   
-        return render(request, 'pandora/login.html', {'form': form, 'username_obj': username_obj, 'is_registered':True})
+            return HttpResponseRedirect('/pandora/responses/')
     else:
         form = LoginForm()
         # form.save()
@@ -32,38 +32,69 @@ def login(request):
 def responses(request):
     if request.method == 'POST':
         form = ResponsesForm(request.POST)
-        form.save()
-        #if form.is_valid():
-            #responses_obj = ResponsesModel()
-            #responses_obj.diet = form.cleaned_data['diet_restrictions']
-            #responses_obj.distance = form.cleaned_data['distance']
-            #responses_obj.address = form.cleaned_data['address']
-            #responses_obj.hurry = form.cleaned_data['hurry']
-            #responses_obj.arrival_time = form.cleaned_data['time']
-            #sresponses_obj.save
-        return render(request, 'pandora/responses.html', {'form':form})
+        if form.is_valid():
+            form.save()
+            return HttpResponseRedirect('/pandora/searchrestaurants/')
     else:
         form = ResponsesForm()
     return render(request, 'pandora/responses.html', {'form': form})
 
 def searchrestaurants(request):
     if request.method == 'POST':
-        form = SearchResponsesForm(request.POST)
-        form.save()
-        return render(request, 'pandora/searchrestaurants.html', {'form': form})
+        form = SearchRestaurantsForm(request.POST)
+        if form.is_valid():
+            form.save()
+            return HttpResponseRedirect('/pandora/pickrestaurants/')
     else:
-        form = SearchResponsesForm()
+        form = SearchRestaurantsForm()
         # form.save()
         return render(request, 'pandora/searchrestaurants.html', {'form': form})
 
+def pickrestaurants(request):
+    if request.method == 'POST':
+        form = PickRestaurantsForm(request.POST)
+        if form.is_valid():
+            form.save()
+            return HttpResponseRedirect('/pandora/recommendation/')
+    else:
+        form = PickRestaurantsForm()
+        # form.save()
+        return render(request, 'pandora/pickrestaurants.html', {'form': form})
+
 def recommendation(request):
-    template = loader.get_template('pandora/recommendation.html')
-    return HttpResponse(template.render(request))
+    if request.method == 'POST':
+        form = RecommendationForm(request.POST)
+        if form.is_valid():
+            form.save()
+            if form['accept'] == True:
+                return HttpResponseRedirect('/pandora/thankyou/')
+            else: 
+                return HttpResponseRedirect('/pandora/rejection/')
+    else:
+        form = RecommendationForm()
+        # form.save()
+        return render(request, 'pandora/recommendation.html', {'form': form})
 
 def rejection(request):
-    template = loader.get_template('pandora/rejection.html')
-    return HttpResponse(template.render(request))
-   
+    if request.method == 'POST':
+        form = RejectionForm(request.POST)
+        if form.is_valid():
+            form.save()
+            return HttpResponseRedirect('/pandora/responses/')
+    else:
+        form = RejectionForm()
+        # form.save()
+        return render(request, 'pandora/rejection.html', {'form': form})
+
+def thankyou(request):   
+    if request.method == 'POST':
+        form = ThankYouForm(request.POST)
+        if form.is_valid():
+            return HttpResponseRedirect('/pandora/login/')
+        else:
+            form = ThankYouForm()
+            return render(request, 'pandora/thankyou.html', {'form': form})
+
    
 def index(request):
     # latest_question_list = Question.objects.order_by('pub_date')[:]
@@ -71,4 +102,4 @@ def index(request):
     # context = {
     #     'latest_question_list': latest_question_list,
     # }
-    return HttpResponseRedirect('/pandora/login')
+    return HttpResponseRedirect('/pandora/login/')

@@ -1,0 +1,12 @@
+<p><strong>
+    Thank you for using Chicago Restaurant Pandora!
+</strong></p>
+
+<form name='thankyouform' action='/pandora/thankyou/' method='post'>
+    {% csrf_token %} 
+    
+    <p> Click here to start over. </p>
+    {{  form.restart  }}
+
+    <input type="submit" value="Submit" />
+</form>

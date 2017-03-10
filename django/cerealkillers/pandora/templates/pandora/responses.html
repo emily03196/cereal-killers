@@ -1,14 +1,14 @@
-<p>
+<p><strong>
     Fill out these questions about your current preferences.
-</p>
+</strong></p>
 
-<form name='responsesform' action='pandora/searchrestaurants' method='post'>
+<form name='responsesform' action='/pandora/responses/' method='post'>
     {% csrf_token %}
 
     <p> Do you have any dietary restrictions?</p>
     {{  form.diet  }}
 
-    <p>What is the maximum distance, in miles, you would travel? (Optional)</p>
+    <p>What is the maximum distance, in miles, you would travel? (Default = 100 miles)</p>
     {{  form.distance  }}
 
     <p>What is your current address?</p>

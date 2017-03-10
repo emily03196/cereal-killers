@@ -1,1 +1,27 @@
-<p>This is the Rejection page.</p>
+<p><strong>
+    Thanks for your input. Please answer the following questions about why you rejected our recommendation, and we'll help you get a different one.
+</strong></p>
+
+<form name='rejectionform' action='/pandora/rejection/' method='post'>
+    {% csrf_token %}
+    <p>
+        Do you dislike this cuisine?
+    </p>    
+    {{  form.cuisine  }}
+
+    <p>
+        Is the price too high?
+    <p>
+    {{  form.price_high  }}
+
+    <p>
+        Is the price range too low?
+    </p>
+    {{  form.price_low  }}
+
+    <p>
+        We'll also allow you to modify your previous responses in just a moment.
+    </p> 
+    <input type="submit" value="Submit" />
+
+</form>
