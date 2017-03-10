@@ -1,22 +1,18 @@
 from django.shortcuts import render
 from django.http import HttpResponse, HttpResponseRedirect
 from django.template import loader
-from .models import Username, DietRestrictions, Distance, Address, Time, Hurry
-from .forms import LoginForm, EnterResponsesForm
+from .models import Username, ResponsesModel
+from .forms import LoginForm, ResponsesForm, SearchResponsesForm
 
 def login(request):
     if request.method == 'POST':
         form = LoginForm(request.POST)
-        # form.save()
+        form.save()
         if form.is_valid():
-            user_id = form.pk
-            user_text = form.cleaned_data['user_text']
-            return HttpResponseRedirect('pandora/%s' % user_text)
-            # user_text = request.POST.get('user_text', '')
-
-        # username_obj = Username(username=user_text)
-        # username_obj.save()
-        # user_id = user_text
+            # user_id = form.cleaned_data['user_id']
+            username = form.cleaned_data['username']
+            # return HttpResponseRedirect('%s' % username)
+            # return HttpResponseRedirect('responses/')   
         return render(request, 'pandora/login.html', {'form': form, 'username_obj': username_obj, 'is_registered':True})
     else:
         form = LoginForm()
@@ -24,34 +20,41 @@ def login(request):
         # user_id = form.pk
         return render(request, 'pandora/login.html', {'form': form})
 
-def processlogin(request, user_id=None):
-    if user_id:
-        user = Username.objects.get(id=user_id)
-    else:
-        user = Username(user=request.user)
-    user_form = LoginForm(instance=user)
-    context = {"user_id": user_id, "user_text": user_form.username}
-    return render(request, "pandora/processlogin", context)
+#def processlogin(request, user_id=None):
+#    if user_id:
+#        user = Username.objects.get(id=user_id)
+#    else:
+#        user = Username(user=request.user)
+#    user_form = LoginForm(instance=user)
+#    context = {"user_id": user_id, "username": user_form.username}
+#    return render(request, "pandora/processlogin", context)
 
-def enterresponses(request):
+def responses(request):
     if request.method == 'POST':
-        form = EnterResponsesForm(request.POST)
-        if form.is_valid():
-            newuser = request.POST.get('newuser', '')
-        diet_obj = DietRestrictions, Distance, Address, Time, Hurry
-        return render(request, 'pandora/newuser.html', {'newuser_obj':newuser_obj})
+        form = ResponsesForm(request.POST)
+        form.save()
+        #if form.is_valid():
+            #responses_obj = ResponsesModel()
+            #responses_obj.diet = form.cleaned_data['diet_restrictions']
+            #responses_obj.distance = form.cleaned_data['distance']
+            #responses_obj.address = form.cleaned_data['address']
+            #responses_obj.hurry = form.cleaned_data['hurry']
+            #responses_obj.arrival_time = form.cleaned_data['time']
+            #sresponses_obj.save
+        return render(request, 'pandora/responses.html', {'form':form})
     else:
-        form = EnterResponsesForm()
-    # template = loader.get_template('pandora/newuser.html')
-    return render(request, 'pandora/newuser.html', {'form': form})
+        form = ResponsesForm()
+    return render(request, 'pandora/responses.html', {'form': form})
 
-def returninguser (request):
-    template = loader.get_template('pandora/returninguser.html')
-    return HttpResponse(template.render(request))
-
-def modifyresponses(request):
-    template = loader.get_template('pandora/modifyresponses.html')
-    return HttpResponse(template.render(request))
+def searchrestaurants(request):
+    if request.method == 'POST':
+        form = SearchResponsesForm(request.POST)
+        form.save()
+        return render(request, 'pandora/searchrestaurants.html', {'form': form})
+    else:
+        form = SearchResponsesForm()
+        # form.save()
+        return render(request, 'pandora/searchrestaurants.html', {'form': form})
 
 def recommendation(request):
     template = loader.get_template('pandora/recommendation.html')

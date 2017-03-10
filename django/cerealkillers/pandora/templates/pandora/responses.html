@@ -1,0 +1,27 @@
+<p>
+    Fill out these questions about your current preferences.
+</p>
+
+<form name='responsesform' action='pandora/searchrestaurants' method='post'>
+    {% csrf_token %}
+
+    <p> Do you have any dietary restrictions?</p>
+    {{  form.diet  }}
+
+    <p>What is the maximum distance, in miles, you would travel? (Optional)</p>
+    {{  form.distance  }}
+
+    <p>What is your current address?</p>
+    {{ form.address  }}
+
+    <p>Are you in a hurry?</p>
+    {{  form.hurry  }}
+
+    <p>What day and time do you plan to arrive at the restaurant?</p>
+    {{  form.arrival_day  }}
+    {{  form.arrival_time}}
+
+
+    <input type="submit" value="Submit" />
+</form>
+

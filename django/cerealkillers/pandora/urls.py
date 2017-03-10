@@ -5,8 +5,10 @@ from . import views
 urlpatterns = [
     url(r'^$', views.login, name='index'),
     url(r'^login/$', views.login, name='login'),
-    url(r'^(?P<user_id>[0-9]+)/$', views.processlogin, name="processlogin"),
-    url(r'^enterresponses/$', views.enterresponses, name='enterresponses'),
+    url(r'^searchrestaurants/$', views.searchrestaurants, name='searchrestaurants'),
+    url(r'^responses/$', views.responses, name='responses'),
     url(r'^recommendation/$', views.recommendation, name='recommendation'),
     url(r'^rejection/$', views.rejection, name='rejection')
 ]
+
+#    url(r'^(?P<user_id>[0-9]+)/$', views.processlogin, name="processlogin"),
