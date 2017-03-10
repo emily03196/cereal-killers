@@ -11,8 +11,7 @@ from collections import deque
 
 def indexer(index, restaurant):
 	'''
-	index: dictionary
-	restaurant: BeautifulSoup item
+	
 	'''
 	info = get_restaurant_info(restaurant)
 	name = info['restaurant_name'] 
@@ -32,6 +31,7 @@ def indexer(index, restaurant):
     index[name['price_range']] = price_bounds_int
     index[name['reviews']] = review_info
 
+
 def find_review_words(restaurant):
     '''
     Finds words within individual reviews
@@ -47,6 +47,9 @@ def find_review_words(restaurant):
 
 
 def get_restaurant_info(restaurant):
+    '''
+    Obtains information pertaining to each individual restaurant
+    '''
     top_reviews = restaurant.find_all('script', type="application/ld+json")[0].string
     top_reviews = json.loads(top_reviews)
 
