@@ -12,11 +12,9 @@ def login(request):
             # user_id = form.cleaned_data['user_id']
             username = form.cleaned_data['username']
             # return HttpResponseRedirect('%s' % username)
-            # return HttpResponseRedirect('responses/')   
             return HttpResponseRedirect('/pandora/responses/')
     else:
         form = LoginForm()
-        # form.save()
         # user_id = form.pk
         return render(request, 'pandora/login.html', {'form': form})
 
@@ -94,12 +92,3 @@ def thankyou(request):
         else:
             form = ThankYouForm()
             return render(request, 'pandora/thankyou.html', {'form': form})
-
-   
-def index(request):
-    # latest_question_list = Question.objects.order_by('pub_date')[:]
-    # template = loader.get_template('pandora/index.html')
-    # context = {
-    #     'latest_question_list': latest_question_list,
-    # }
-    return HttpResponseRedirect('/pandora/login/')

@@ -50,6 +50,13 @@ class PickRestaurantsModel(models.Model):
     pick_results3 = models.CharField(blank=True, max_length=500, choices=search_results3)
     pick_results4 = models.CharField(blank=True, max_length=500, choices=search_results4)
     pick_results5 = models.CharField(blank=True, max_length=500, choices=search_results5)
+    rating_choices = [(1,1), (2,2), (3,3), (4,4), (5,5)]
+    rating1 = models.CharField(max_length=1, choices=rating_choices, default=5)
+    rating2 = models.CharField(max_length=1, choices=rating_choices, default=5)
+    rating3 = models.CharField(max_length=1, choices=rating_choices, default=5)
+    rating4 = models.CharField(max_length=1, choices=rating_choices, default=5)
+    rating5 = models.CharField(max_length=1, choices=rating_choices, default=5)
+
 
 class RecommendationModel(models.Model):
     accept = models.NullBooleanField()
@@ -61,33 +68,3 @@ class RejectionModel(models.Model):
 
 class RestartModel(models.Model):
     restart = models.BooleanField()
-#class DietRestrictions(models.Model):
-#    list_choices = [("VT", "Vegetarian"),("VG", "Vegan"), ("HL", "Halal"), ("KS", "Kosher"), ("GF", "Gluten-Free")]
-#    user = models.ForeignKey(Username, on_delete=models.CASCADE, default=None)
-#    choices = models.CharField(blank=True, max_length=500, choices=list_choices) 
-#    def __str__(self):
-#        return self.choices
-
-#class Distance(models.Model):
-#    user = models.ForeignKey(Username, on_delete=models.CASCADE, default=None)
-#    distance_integer = models.IntegerField(blank=True)
-#    def __str__(self):
-#        return self.distance_integer
-
-#class Address(models.Model):
-#    user = models.ForeignKey(Username, on_delete=models.CASCADE, default=None)
-#    address_text = models.CharField(blank=True, max_length=100)
-#    def __str__(self):
-#        return self.address_text 
-
-#class Hurry(models.Model):
-#    user = models.ForeignKey(Username, on_delete=models.CASCADE, default=None)
-#    hurry_choice = models.BooleanField(blank=True)
-#    def __str__(self):
-#        return self.hurry_choice 
-
-#class Time(models.Model):
-#    user = models.ForeignKey(Username, on_delete=models.CASCADE, default=None)
-#    arrival_time = models.DateTimeField(blank=True, auto_now=True)
-#    def __str__(self):
-#        return self.value_to_string(arrival_time)
