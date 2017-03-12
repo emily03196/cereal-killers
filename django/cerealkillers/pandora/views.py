@@ -4,6 +4,7 @@ from django.template import loader
 from .models import Username, ResponsesModel, SearchRestaurantsModel, PickRestaurantsModel, RecommendationModel, RejectionModel
 from .forms import LoginForm, ResponsesForm, SearchRestaurantsForm, PickRestaurantsForm, RecommendationForm, RejectionForm
 from django.forms.models import model_to_dict
+from ... Audrey_User import User
 
 # http://stackoverflow.com/questions/8993749/transform-an-unbound-form-to-a-bound-one
 # To update field in database: 
