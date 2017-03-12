@@ -1,8 +1,15 @@
 from django.shortcuts import render
 from django.http import HttpResponse, HttpResponseRedirect
 from django.template import loader
-from .models import Username, ResponsesModel, SearchRestaurantsModel, PickRestaurantsModel, RecommendationModel, RejectionModel, RestartModel
-from .forms import LoginForm, ResponsesForm, SearchRestaurantsForm, PickRestaurantsForm, RecommendationForm, RejectionForm, ThankYouForm
+from .models import Username, ResponsesModel, SearchRestaurantsModel, PickRestaurantsModel, RecommendationModel, RejectionModel
+from .forms import LoginForm, ResponsesForm, SearchRestaurantsForm, PickRestaurantsForm, RecommendationForm, RejectionForm
+from django.forms.models import model_to_dict
+
+# http://stackoverflow.com/questions/8993749/transform-an-unbound-form-to-a-bound-one
+# To update field in database: 
+# Model.field = "updated value"
+# Model.save()
+# Form > Model: Form.instance
 
 def login(request):
     if request.method == 'POST':
@@ -13,6 +20,12 @@ def login(request):
             username = form.cleaned_data['username']
             # return HttpResponseRedirect('%s' % username)
             return HttpResponseRedirect('/pandora/responses/')
+        elif form.errors['username'] == ['Username with this Username already exists.']:
+            username = form.dajta['username']
+            returning_user = Username.objects.filter(username=username)[0]
+            form = LoginForm(model_to_dict(returning_user), instance=returning_user)
+            form.save()
+            return HttpResponseRedirect('/pandora/responses/')            
     else:
         form = LoginForm()
         # user_id = form.pk
@@ -64,13 +77,12 @@ def recommendation(request):
         form = RecommendationForm(request.POST)
         if form.is_valid():
             form.save()
-            if form['accept'] == True:
-                return HttpResponseRedirect('/pandora/thankyou/')
-            else: 
+            if form.cleaned_data.get('accept') != True:
                 return HttpResponseRedirect('/pandora/rejection/')
+            else: 
+                return HttpResponseRedirect('/pandora/thankyou/')
     else:
         form = RecommendationForm()
-        # form.save()
         return render(request, 'pandora/recommendation.html', {'form': form})
 
 def rejection(request):
@@ -85,10 +97,4 @@ def rejection(request):
         return render(request, 'pandora/rejection.html', {'form': form})
 
 def thankyou(request):   
-    if request.method == 'POST':
-        form = ThankYouForm(request.POST)
-        if form.is_valid():
-            return HttpResponseRedirect('/pandora/login/')
-        else:
-            form = ThankYouForm()
-            return render(request, 'pandora/thankyou.html', {'form': form})
+    return render(request, 'pandora/thankyou.html')

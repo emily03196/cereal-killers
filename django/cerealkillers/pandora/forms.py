@@ -1,6 +1,6 @@
 from django import forms
 from django.forms import ModelForm
-from .models import Username, ResponsesModel, SearchRestaurantsModel, PickRestaurantsModel, RecommendationModel, RejectionModel, RestartModel
+from .models import Username, ResponsesModel, SearchRestaurantsModel, PickRestaurantsModel, RecommendationModel, RejectionModel
 
 
 class LoginForm(ModelForm): 
@@ -9,6 +9,8 @@ class LoginForm(ModelForm):
     class Meta:
         model = Username
         fields = ["username", 'user_id']
+    def __init__(self, *args, **kwargs):
+        super(LoginForm, self).__init__(*args, **kwargs)
 
 
 class ResponsesForm(ModelForm):
@@ -36,7 +38,3 @@ class RejectionForm(ModelForm):
         model = RejectionModel
         fields = ["cuisine", "price_high", "price_low"]
 
-class ThankYouForm(forms.Form):
-    class Meta:
-        model = RestartModel
-        fields = ['restart']

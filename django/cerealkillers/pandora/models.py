@@ -11,8 +11,7 @@ class Username(models.Model):
 
 class ResponsesModel(models.Model):
     # http://stackoverflow.com/questions/32423401/save-form-data-in-django
-    #user_id = models.ForeignKey(Username, on_delete=models.CASCADE, default=None)
-    #response_id = "response" + str(user_id)
+    user= models.OneToOneField(Username, on_delete=models.CASCADE, unique=True)
 
     diet_choices = [("VT", "Vegetarian"),("VG", "Vegan"), ("HL", "Halal"), ("KS", "Kosher"), ("GF", "Gluten-Free")]
     diet = models.CharField(blank=True, max_length=500, choices=diet_choices) 
@@ -29,10 +28,12 @@ class ResponsesModel(models.Model):
     now = datetime.datetime.now()
     arrival_time = models.TimeField(editable=True, blank=True, default=now)
     
-    #def __str__(self):
-    #    return self.response_id
+    def __str__(self):
+        return "response_%s" % self.user_id 
 
 class SearchRestaurantsModel(models.Model):
+    user= models.OneToOneField(Username, on_delete=models.CASCADE, unique=True)
+
     search_query1 = models.CharField(max_length=100)
     search_query2 = models.CharField(max_length=100, blank=True)
     search_query3 = models.CharField(max_length=100, blank=True)
@@ -40,6 +41,8 @@ class SearchRestaurantsModel(models.Model):
     search_query5 = models.CharField(max_length=100, blank=True)
 
 class PickRestaurantsModel(models.Model):
+    user= models.OneToOneField(Username, on_delete=models.CASCADE, unique=True)
+
     search_results1 = [(None, None)]
     search_results2 = [(None, None)]
     search_results3 = [(None, None)]
@@ -59,12 +62,14 @@ class PickRestaurantsModel(models.Model):
 
 
 class RecommendationModel(models.Model):
+    user= models.OneToOneField(Username, on_delete=models.CASCADE, unique=True)
+
     accept = models.NullBooleanField()
 
 class RejectionModel(models.Model):
+    user= models.OneToOneField(Username, on_delete=models.CASCADE, unique=True)
+
     cuisine = models.NullBooleanField(blank=True)
     price_high = models.NullBooleanField(blank=True)
     price_low = models.NullBooleanField(blank=True)
 
-class RestartModel(models.Model):
-    restart = models.BooleanField()
