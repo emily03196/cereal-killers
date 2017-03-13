@@ -33,7 +33,7 @@ def get_opentable_results():
 
 def get_google():
     '''
-    Using the dictionary built from the Yelp API, make calls to the Google Places API 
+    Using the results from the OpenTable API, make calls to Google Places API using address and coordinates to  
     '''
     google_index = {}
 
@@ -62,6 +62,9 @@ def get_google():
     return google_index
 
 def get_review_dic():
+    '''
+    Make dictionary of reviews for each restaurant from Google Places dataset
+    '''
     review_dic = {}
     for call in big_google:
         if 'reviews' in big_google[call]:
@@ -70,8 +73,6 @@ def get_review_dic():
             for review in reviews:
                 review_dic[call].append(review['text'])
     return review_dic
-
-
 
 
 
@@ -107,6 +108,9 @@ def get_yelp_results():
 def get_google_reviews(data):
     '''
     Using the dictionary built from the Yelp API, make calls to the Google Places API to get reviews
+
+    We used this to make a review dictionary before pulling other data from Google because we needed to test 
+    other code.
     '''
     review_index = {}
     for call in data:
