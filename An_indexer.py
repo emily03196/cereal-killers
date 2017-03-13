@@ -6,15 +6,11 @@ import json
 #Read in Yelp and Google Places data previously stored from API calls
 
 
-ph_file = 'google_ph.json'
+
 yelp = 'final_yelp_dic.json'
 ot_file = 'ot_data.json'
 
 
-
-with open(ph_file, 'r') as f:
-    data = f.read()
-ph_index = json.loads(data)
 
 with open(yelp, 'r') as f:
     data = f.read()
@@ -36,6 +32,9 @@ sentiment_dic = json.loads(data)
 
 
 def get_ot_dic():
+    '''
+    Transform OT dataset from API into dictionary for easy indexing
+    '''
     ot_dic = {}
     for call in ot_results:
         ot_dic[call['name']] = call
@@ -46,7 +45,7 @@ def get_ot_dic():
 def get_large_index():
     '''
     Build an index that stores for each restaurant: phone  number, rating, cuisine, location(address and coordiantes), price level,
-    hours open, and word counts from the reivews
+    hours open, and sentiment analysis for the reviews
     '''
     weekday_dic = {0:'Sunday', 1:'Monday', 2:'Tuesday', 3:'Wednesday', 4:'Thursday', 5:'Friday', 6:'Saturday'}
 
