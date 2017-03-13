@@ -8,25 +8,12 @@ from geopy.distance import vincenty
 import re
 from . import COPY_An_indexer
 
-day_dic = {'Sunday': 0, 'Monday': 1, 'Tuesday': 2, 'Wednesday': 3, 'Thursday': 4, \
-'Friday': 5, 'Saturday': 6}
+data_file = 'pandora/COPY_final_completed_index.json'
+with open(data_file, 'r') as f:
+    data = f.read()
+data_dic = json.loads(data)
 
-parsed_reviews = COPY_An_indexer.parse_reviews()
-reviews_file = 'full_reviews.json'
-ph_file = 'google_ph.json'
-yelp = 'yelp_data.json'
-with open(reviews_file, 'r') as f:
-    data = f.read()
-reviews_index = json.loads(data)
-with open(ph_file, 'r') as f:
-    data = f.read()
-ph_index = json.loads(data)
-with open(yelp, 'r') as f:
-    data = f.read()
-yelp_results = json.loads(data)
-data_dic = An_indexer.get_large_index(parsed_reviews, ph_index, yelp_results)
-
-been_to_dic = {'Yusho': 4, 'bellyQ': 3, 'Chicago Peoples Temple': 5, 'Dine': 4}
+been_to_dic = {'bistronomic': 4, 'Yum Cha': 3, 'Zoku Sushi': 5, 'Wildfire - Chicago': 4}
 address = '6031 South Ellis Ave'
 max_distance = 20
 dietary_restriction = ['Vegetarian']
@@ -78,14 +65,15 @@ class User:
         located_restaurants = {}
         if self.user_lat is not None and self.hour is not None:
             for restaurant, sub_dic in self.data_dic.items():
-                lat2 = sub_dic.get('location', {}).get('latitude', 0)#some restaurants don't have locations/latitude
-                lon2 = sub_dic.get('location', {}).get('longitude', 0)
+                lat2 = sub_dic['location'].get('lat', 0)#some restaurants don't have locations/latitude
+                lon2 = sub_dic['location'].get('lon', 0)
                 miles = vincenty((self.user_lat, self.user_lon), (lat2, lon2)).miles
                 closing_hr = 2400#some restaurants don't have hours
                 opening_hr = 0
-                if 'hours' in sub_dic and 'close' in sub_dic['hours'] and 'open' in sub_dic['hours']: 
-                    closing_hr = float(sub_dic['hours'][day_dic[self.day]]['close']['time'])
-                    opening_hr = float(sub_dic['hours'][day_dic[self.day]]['open']['time'])
+                hours = sub_dic['hours']
+                if self.day in sub_dic['hours']: 
+                    closing_hr = float(hours[self.day][0])
+                    opening_hr = float(hours[self.day][1])
                 if miles <= self.max_distance and self.hour <= closing_hr and self.hour >= opening_hr:       
                     located_restaurants[restaurant] = sub_dic
                     located_restaurants[restaurant]['distance'] = miles
@@ -93,16 +81,17 @@ class User:
             for restaurant, sub_dic in self.data_dic.items():
                 closing_hr = 2400
                 opening_hr = 0
-                if 'hours' in sub_dic and 'close' in sub_dic['hours'] and 'open' in sub_dic['hours']: 
-                    closing_hr = float(sub_dic['hours'][day_dic[self.day]]['close']['time'])
-                    opening_hr = float(sub_dic['hours'][day_dic[self.day]]['open']['time'])
+                hours = sub_dic['hours']
+                if self.day in sub_dic['hours']: 
+                    closing_hr = float(hours[self.day][0])
+                    opening_hr = float(hours[self.day][1])
                 if self.hour <= closing_hr and self.hour >= opening_hr:
                     located_restaurants[restaurant] = sub_dic
                     located_restaurants[restaurant]['distance'] = miles
         elif self.user_lat is not None:
             for restaurant, sub_dic in self.data_dic.items():
-                lat2 = sub_dic.get('location', {}).get('latitude', 0)#some restaurants don't have locations/latitude
-                lon2 = sub_dic.get('location', {}).get('longitude', 0)
+                lat2 = sub_dic.get('location', {}).get('lat', 0)#some restaurants don't have locations/latitude
+                lon2 = sub_dic.get('location', {}).get('lon', 0)
                 miles = vincenty((self.user_lat, self.user_lon), (lat2, lon2)).miles
                 if miles <= self.max_distance:
                     located_restaurants[restaurant] = sub_dic
@@ -144,12 +133,12 @@ class User:
             cuisine_score = 0
             dietary_restriction_multiplier = 1
             keywords_multiplier = 1
-            if 'parsed_reviews' in sub_dic:
-                reviews = sub_dic['parsed_reviews']
+            if 'analyzed_reviews' in sub_dic:
+                reviews = sub_dic['analyzed_reviews']
                 for restriction in self.dietary_restriction:
                     if restriction in reviews.get('dietary_choices', []):
                         dietary_restriction_multiplier += 1/5
-                for keyword, value in keywords:
+                for keyword, value in keywords.items():
                     if value is True:
                         keywords_multiplier += reviews.get(keyword+'_score', 0)
             if len(cuisine_lst) > 0:
@@ -170,9 +159,8 @@ class User:
                 'cuisine_lst': cuisine_lst, 'price': price, 'dietary_restriction_multiplier': \
                 dietary_restriction_multiplier, 'address': address, 'phone': phone})
         
-        recommendation_lst = sorted(sorted(sorted(sorted(sorted(recommendation_lst, \
-            key=lambda item:item['distance']), key=lambda item:item['keywords_score'], \
-        reverse=True),key=lambda item:item['rating_score'], reverse=True), key=lambda \
+        recommendation_lst = sorted(sorted(sorted(sorted(recommendation_lst, \
+            key=lambda item:item['distance']),key=lambda item:item['rating_score'], reverse=True), key=lambda \
         item:round(item['cuisine_score']*item['dietary_restriction_multiplier']*item['keywords_multiplier']\
             +item['price_score'], 0), reverse=True), key=lambda item:item['been_to_score'])
         
@@ -186,7 +174,7 @@ class User:
         recommendation_lst = recommendation_lst[1:]
         if not_cuisine is None and price_too_high is None and price_too_low is None:
             if len(recommendation_lst) == 0:
-                return 'No Options'
+                return 'No Options', recommendation_lst
             else:
                 return recommendation_lst[0], recommendation_lst
         else:
@@ -198,7 +186,8 @@ class User:
                     cuisine_score = rec['cuisine_score']
                     for cuisine in cuisine_lst:
                         if cuisine in disliked_cuisine_lst:
-                            cuisine_score -= 5*self.cuisine_preference_dic.get(cuisine,0)/size - 5/size #needs to rethink how much to subtract
+                            cuisine_score -= 5*self.cuisine_preference_dic.get(cuisine,0)/len(cuisine_lst)\
+                             - 1/len(cuisine_lst) #needs to rethink how much to subtract
                     rec['cuisine_score'] = cuisine_score
             if price_too_high is True:
                 recommendation_lst = [recommendation for recommendation in recommendation_lst if \
@@ -207,13 +196,15 @@ class User:
                 recommendation_lst = [recommendation for recommendation in recommendation_lst if \
                 recommendation['price'] > rejected_price]
             
-            recommendation_lst = sorted(sorted(sorted(sorted(sorted(recommendation_lst, \
-                key=lambda item:item['distance']), key=lambda item:item['keywords_score'], \
-            reverse=True),key=lambda item:item['rating_score'], reverse=True), key=lambda \
-            item:round(item['cuisine_score']*item['dietary_restriction_multiplier']*item['keywords_multiplier']\
-                +item['price_score'], 0), reverse=True), key=lambda item:item['been_to_score'])           
+            recommendation_lst = sorted(sorted(sorted(sorted(recommendation_lst, 
+                key=lambda item:item['distance']),key=lambda item:item['rating_score'], reverse=True), key=lambda 
+            item:round(item['cuisine_score']*item['dietary_restriction_multiplier']*item['keywords_multiplier']
+                +item['price_score'], 0), reverse=True), key=lambda item:item['been_to_score'])          
 
-            return recommendation_lst[0], recommendation_lst
+            if len(recommendation_lst) == 0:
+                return 'No Options', recommendation_lst
+            else:
+                return recommendation_lst[0], recommendation_lst
 
     def modify_address(self, new_address):
         self.user_lat = None
@@ -252,9 +243,6 @@ class User:
     def accept(self, rec):
         return self.username, self.been_to_dic, self.address, rec
 
-#look for keywords we created
 #helpful reviews or most recent reviews
-#individual dishes
 #user puts in single word, bigrams. 
-#sentiment analysis. nltk. 
 #put in dumplings. show the part of the reviews. 

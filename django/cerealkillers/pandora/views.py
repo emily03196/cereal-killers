@@ -4,7 +4,10 @@ from django.template import loader
 from .models import Username, ResponsesModel, SearchRestaurantsModel, PickRestaurantsModel, RecommendationModel, RejectionModel
 from .forms import LoginForm, ResponsesForm, SearchRestaurantsForm, PickRestaurantsForm, RecommendationForm, RejectionForm
 from django.forms.models import model_to_dict
-from .COPY_Audrey_User import User 
+import sys
+sys.path.append('cereal_killers/django/cerealkillers/pandora')
+from cereal_killers.django.cerealkillers.pandora import Audrey_User 
+from . import COPY_Audrey_User
 from . import COPY_search
 
 # http://stackoverflow.com/questions/8993749/transform-an-unbound-form-to-a-bound-one

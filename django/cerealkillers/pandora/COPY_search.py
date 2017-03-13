@@ -1,4 +1,4 @@
-import final_indexer
+from . import COPY_indexer
 import jellyfish
 import queue
 
