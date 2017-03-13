@@ -4,13 +4,14 @@ from django.template import loader
 from .models import Username, ResponsesModel, SearchRestaurantsModel, PickRestaurantsModel, RecommendationModel, RejectionModel
 from .forms import LoginForm, ResponsesForm, SearchRestaurantsForm, PickRestaurantsForm, RecommendationForm, RejectionForm
 from django.forms.models import model_to_dict
-from ... Audrey_User import User
+from .COPY_Audrey_User import User 
+from . import COPY_search
 
 # http://stackoverflow.com/questions/8993749/transform-an-unbound-form-to-a-bound-one
 # To update field in database: 
 # Model.field = "updated value"
 # Model.save()
-# Form > Model: Form.instance
+# To get Model object from a ModelForm: Form.instance
 
 def login(request):
     if request.method == 'POST':
