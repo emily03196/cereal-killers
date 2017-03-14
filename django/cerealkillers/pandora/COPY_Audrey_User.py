@@ -6,7 +6,6 @@ from geopy.geocoders import Nominatim
 geolocator = Nominatim()
 from geopy.distance import vincenty
 import re
-from . import COPY_An_indexer
 
 data_file = 'pandora/COPY_final_completed_index.json'
 with open(data_file, 'r') as f:

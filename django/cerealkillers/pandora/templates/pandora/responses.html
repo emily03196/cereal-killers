@@ -2,7 +2,7 @@
     Fill out these questions about your current preferences.
 </strong></p>
 
-<form name='responsesform' action='/pandora/responses/' method='post'>
+<form name='responsesform' action='/pandora/{{  user_id  }}/responses/' method='post'>
     {% csrf_token %}
 
     <p> Do you have any dietary restrictions?</p>

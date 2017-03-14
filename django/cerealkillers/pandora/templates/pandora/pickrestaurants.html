@@ -1,52 +1,21 @@
 <p><strong>
-    Select the restaurants you searched for from these results. 
+    Select the restaurant from these results to add to your history.
 </strong></p>
 
-<form name='pickrestaurantsform' action='/pandora/pickrestaurants/' method='post'>
+<form name='pickrestaurantsform' action='/pandora/{{  user_id  }}/pickrestaurants/' method='post'>
     {% csrf_token %}
     <p>
-    Search #1: 
+    Search Results: 
     </p>    
-    {{  form.pick_results1  }}
+    {{  form.pick_result  }}
     <p>
     How do you rate this restaurant? 
     </p>    
-    {{ form.rating1  }}
+    {{ form.rating  }}
     <p>
-    Search #2: 
+    Do you want to re-do your search or add another restaurant to your history? 
     </p>    
-    {{  form.pick_results2  }}
-    <p>
-    How do you rate this restaurant? 
-    </p>    
-    {{ form.rating2  }}
-
-    <p>
-    Search #3: 
-    </p>    
-    {{  form.pick_results3  }}
-    <p>
-    How do you rate this restaurant? 
-    </p>    
-    {{ form.rating3  }}
-
-    <p>
-    Search #4: 
-   </p>    
-    {{  form.pick_results4  }}
-    <p>
-    How do you rate this restaurant? 
-    </p>    
-    {{ form.rating4  }}
-
-    <p>
-    Search #5: 
-    </p>    
-    {{  form.pick_results5  }}
-    <p>
-    How do you rate this restaurant? 
-    </p>    
-    {{ form.rating5  }}
+    {{  form.search_again  }}
 
     <input type="submit" value="Submit" />
 

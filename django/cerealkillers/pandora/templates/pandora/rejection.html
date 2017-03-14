@@ -2,7 +2,7 @@
     Thanks for your input. Please answer the following questions about why you rejected our recommendation, and we'll help you get a different one.
 </strong></p>
 
-<form name='rejectionform' action='/pandora/rejection/' method='post'>
+<form name='rejectionform' action='/pandora/{{  user_id  }}/rejection/' method='post'>
     {% csrf_token %}
     <p>
         Do you dislike this cuisine?
