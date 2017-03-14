@@ -4,18 +4,36 @@ CS 122 Project - Pandora Restaurant Generator that allows users to input in rest
 
 ## Files
 
-### indexer.py
+### Emily_An.py
 
-### reviews.py
+```
+ANY CODE WE HAVE HERE
+```
+
+### An_indexer.py
+
+```
+ANY CODE WE HAVE HERE
+```
+
+### Emily_reviews.py
 References "categories.py" to parse through reviews from the Google Place Search API and determines a final sentiment dictionary for each individual restaurant. 
 
-### user.py
+```
+ANY CODE WE HAVE HERE
+```
+
+### Audrey_user.py
+
+```
+ANY CODE WE HAVE HERE
+```
 
 ## Usage
 
 ### Basics
 
-Utilizing the ______
+Utilizing the Django module created, we can
 
 ```
 ANY CODE WE HAVE HERE
