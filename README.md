@@ -15,6 +15,7 @@ ANY CODE WE HAVE HERE
 
 ### An_indexer.py
 
+Reads in Yelp and Google Places data previously stored from API calls
 ```
 ANY CODE WE HAVE HERE
 ```
