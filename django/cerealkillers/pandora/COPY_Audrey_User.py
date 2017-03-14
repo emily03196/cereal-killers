@@ -71,8 +71,8 @@ class User:
                 opening_hr = 0
                 hours = sub_dic['hours']
                 if self.day in sub_dic['hours']: 
-                    closing_hr = float(hours[self.day][0])
-                    opening_hr = float(hours[self.day][1])
+                    closing_hr = float(hours[self.day][1])
+                    opening_hr = float(hours[self.day][0])
                 if miles <= self.max_distance and self.hour <= closing_hr and self.hour >= opening_hr:       
                     located_restaurants[restaurant] = sub_dic
                     located_restaurants[restaurant]['distance'] = miles
@@ -82,8 +82,8 @@ class User:
                 opening_hr = 0
                 hours = sub_dic['hours']
                 if self.day in sub_dic['hours']: 
-                    closing_hr = float(hours[self.day][0])
-                    opening_hr = float(hours[self.day][1])
+                    closing_hr = float(hours[self.day][1])
+                    opening_hr = float(hours[self.day][0])
                 if self.hour <= closing_hr and self.hour >= opening_hr:
                     located_restaurants[restaurant] = sub_dic
                     located_restaurants[restaurant]['distance'] = miles

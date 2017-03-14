@@ -6,7 +6,7 @@
     {% csrf_token %}
 
     <p>
-    Search Results: 
+    Search Restaurants: 
     </p>    
     {{  form.pick_result  }}
     <font color='red'>{{ form.pick_result.errors  }}</font>
@@ -16,7 +16,7 @@
     {{ form.rating  }}
     <font color='red'>{{ form.rating.errors  }}</font>
     <p>
-    Do you want to re-do your search or add another restaurant to your history? 
+    Do you want to add another restaurant to your history? 
     </p>    
     {{  form.search_again  }}
     <font color='red'>{{ form.search_again.errors  }}</font>

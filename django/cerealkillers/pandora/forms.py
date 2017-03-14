@@ -1,6 +1,6 @@
 from django import forms
 from django.forms import ModelForm
-from .models import Username, ResponsesModel, SearchRestaurantsModel, PickRestaurantsModel, RecommendationModel, RejectionModel, SearchChoicesModel
+from .models import Username, ResponsesModel, PickRestaurantsModel, RecommendationModel, RejectionModel
 
 
 class LoginForm(ModelForm): 
@@ -15,20 +15,18 @@ class LoginForm(ModelForm):
 class ResponsesForm(ModelForm):
     class Meta:
         model = ResponsesModel
-        fields = ['diet', 'distance', 'address', 'hurry', 'arrival_day', 'arrival_time']
-
+        fields = ['diet', 'distance', 'address', 'hurry', 'environment', 'service', 'arrival_day', 'arrival_time']
+'''
 class SearchRestaurantsForm(ModelForm):
+
     class Meta:
         model = SearchRestaurantsModel
         fields = ['search_query']
-
+'''
 class PickRestaurantsForm(ModelForm):
-    queryset_choices = SearchChoicesModel.objects.all().order_by('-id')[:10]
-    list_choices = [(ch, ch) for ch in list(queryset_choices)]
-    pick_result = forms.ChoiceField(required=False, choices=list_choices, widget=forms.RadioSelect)
     class Meta:
         model = PickRestaurantsModel
-        fields = ['rating', 'search_again']
+        fields = ['rating', 'search_again', 'pick_result']
         
 class RecommendationForm(ModelForm):
     class Meta:

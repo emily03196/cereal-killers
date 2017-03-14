@@ -1,8 +1,8 @@
 from django.shortcuts import render
 from django.http import HttpResponse, HttpResponseRedirect
 from django.template import loader
-from .models import Username, ResponsesModel, SearchRestaurantsModel, PickRestaurantsModel, RecommendationModel, RejectionModel, SearchChoicesModel
-from .forms import LoginForm, ResponsesForm, SearchRestaurantsForm, PickRestaurantsForm, RecommendationForm, RejectionForm
+from .models import Username, ResponsesModel, PickRestaurantsModel, RecommendationModel, RejectionModel
+from .forms import LoginForm, ResponsesForm, PickRestaurantsForm, RecommendationForm, RejectionForm
 from django.forms.models import model_to_dict
 #import sys
 #sys.path.append('cereal_killers/django/cerealkillers/pandora')
@@ -15,6 +15,8 @@ from . import COPY_search
 # Model.field = "updated value"
 # Model.save()
 # To get Model object from a ModelForm: Form.instance
+
+
 
 def login(request):
     if request.method == 'POST':
@@ -44,6 +46,8 @@ def responses(request, user_id):
                 response_model.distance = form.cleaned_data['distance']
                 response_model.address = form.cleaned_data['address']
                 response_model.hurry = form.cleaned_data['hurry']
+                response_model.environment = form.cleaned_data['environment']
+                response_model.service = form.cleaned_data['service']
                 response_model.arrival_day = form.cleaned_data['arrival_day']
                 response_model.arrival_time = form.cleaned_data['arrival_time']
                 response_model.save()
@@ -52,11 +56,13 @@ def responses(request, user_id):
                 distance = form.cleaned_data['distance']
                 address = form.cleaned_data['address']
                 hurry = form.cleaned_data['hurry']
+                environment = form.cleaned_data['environment']
+                service = form.cleaned_data['service']
                 arrival_day = form.cleaned_data['arrival_day']
                 arrival_time = form.cleaned_data['arrival_time']
-                response_model = ResponsesModel(user_id=user_id, diet=diet, distance=distance, address=address, hurry=hurry, arrival_time=arrival_time, arrival_day=arrival_day)
+                response_model = ResponsesModel(user_id=user_id, diet=diet, distance=distance, address=address, hurry=hurry, arrival_time=arrival_time, arrival_day=arrival_day, environment=environment, service=service)
                 response_model.save()
-            return HttpResponseRedirect('/pandora/%s/searchrestaurants/' % user_id)
+            return HttpResponseRedirect('/pandora/%s/pickrestaurants/' % user_id)
     else:
         if ResponsesModel.objects.filter(user_id=user_id):
             response_model = ResponsesModel.objects.get(user_id=user_id)
@@ -64,7 +70,7 @@ def responses(request, user_id):
         else:
             form = ResponsesForm()
         return render(request, 'pandora/responses.html', {'form': form, 'user_id': user_id})
-
+'''
 def searchrestaurants(request, user_id):
     if request.method == 'POST':
         form = SearchRestaurantsForm(request.POST)
@@ -73,6 +79,10 @@ def searchrestaurants(request, user_id):
             user = Username.objects.get(user_id=user_id)
             search_model = SearchRestaurantsModel(search_query=search_query, user_id=user_id)
             search_model.save()
+            list_search_results = reversed(COPY_search.search(search_query))
+            for item in list_search_results:
+                choice = SearchChoicesModel(choice=item, search_query_model=search_model, user_id=user_id)
+                choice.save()
             return HttpResponseRedirect('/pandora/%s/pickrestaurants/' % user_id)
     else:
         if SearchRestaurantsModel.objects.filter(user_id=user_id):
@@ -81,7 +91,7 @@ def searchrestaurants(request, user_id):
         else:
             form = SearchRestaurantsForm()
         return render(request, 'pandora/searchrestaurants.html', {'form': form, 'user_id': user_id})
-
+'''
 def pickrestaurants(request, user_id):
     if request.method == 'POST':
         form = PickRestaurantsForm(request.POST)
@@ -92,22 +102,14 @@ def pickrestaurants(request, user_id):
             pick_model = PickRestaurantsModel(user_id=user_id, pick_result=pick_result, rating=rating, search_again=search_again)
             pick_model.save()
             if form.cleaned_data['search_again']==True:
-                return HttpResponseRedirect('/pandora/%s/searchrestaurants/' % user_id)
+                return HttpResponseRedirect('/pandora/%s/pickrestaurants/' % user_id)
             else: 
                 return HttpResponseRedirect('/pandora/%s/recommendation/' % user_id)
         return render(request, 'pandora/pickrestaurants.html', {'form': form, 'user_id': user_id})
 
     else:
         # http://stackoverflow.com/questions/5329586/django-modelchoicefield-filtering-query-set-and-setting-default-value-as-an-obj
-        search_query_model = SearchRestaurantsModel.objects.filter(user_id=user_id).last()
-        search_query = search_query_model.search_query
-        list_search_results = reversed(COPY_search.search(search_query))
-        if len(SearchChoicesModel.objects.filter(search_query_model=search_query_model)) <= 10:
-            for item in list_search_results:
-                choice = SearchChoicesModel(choice=item, search_query_model=search_query_model, user_id=user_id)
-                choice.save()
         form = PickRestaurantsForm()
-        form.fields['pick_result'].queryset = SearchChoicesModel.objects.filter(search_query_model=search_query_model)
         return render(request, 'pandora/pickrestaurants.html', {'form': form, 'user_id': user_id})
 
 def recommendation(request, user_id):
@@ -135,7 +137,7 @@ def recommendation(request, user_id):
         dietary_restriction = response_model.diet
         max_distance = response_model.distance
         been_to_dic = {}
-        keywords = {'environment': None, 'service': None, 'waiting': response_model.hurry}
+        keywords = {'environment': response_model.environment, 'service': response_model.service, 'waiting': response_model.hurry}
 
         for past_restaurant in past_restaurant_models:
             been_to_dic[past_restaurant.pick_result] = int(past_restaurant.rating)
@@ -150,6 +152,7 @@ def recommendation(request, user_id):
             price_too_low = rej_model.price_low
 
             recommendation, rec_list = Pandora_User.reject(rec_list, not_cuisine, price_too_high, price_too_low)
+        
         if recommendation == 'No Options':
             rec_restaurant = recommendation
         else: 
@@ -168,7 +171,7 @@ def rejection(request, user_id):
             rej_price_low = form.cleaned_data['price_low']
             rej_model = RejectionModel(user_id=user_id, cuisine=rej_cuisine, price_high=rej_price_high, price_low=rej_price_low)
             rej_model.save()
-            return HttpResponseRedirect('/pandora/%s/responses/' % user_id)
+            return HttpResponseRedirect('/pandora/%s/recommendation/' % user_id)
     else:
         form = RejectionForm()
         return render(request, 'pandora/rejection.html', {'form': form, 'user_id': user_id})
