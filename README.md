@@ -70,17 +70,28 @@ Example sentiment dictionary output:
 ```
 
 ### Audrey_user.py
+Generates the overall recommendation for the restaurant based on user history to generate the user's individual cuisine preferences. The algorithm then locates potential restaurants that match the user's specifications for distance from, hours to, and scores each of the restaurants based on these requirements. The algorithm then outputs a final restaurant as the recommendation. 
 
+Example input into the algorithm:
+```
+been_to_dic = {'Yusho': 4, 'bellyQ': 3, 'Chicago Peoples Temple': 5, 'Dine': 4}
+address = '6031 South Ellis Ave'
+max_distance = 20
+dietary_restriction = ['Vegetarian']
+time = 'Monday 1800'
+username = 'Liz'
+keywords = {'environment': None, 'service': None, 'waiting': None}
+```
+Example output:
 ```
 ANY CODE WE HAVE HERE
 ```
 
-
-### Audrey_util.py
-
+If the restaurant is rejected, we input:
 ```
 ANY CODE WE HAVE HERE
 ```
+and the restaurant generates a new recommendation until we accept the final recommendation. 
 
 
 ### search.py
@@ -90,10 +101,41 @@ ANY CODE WE HAVE HERE
 ```
 ## Usage
 
-### Basics
+### Django Module
 
-Utilizing the Django module created, we can
-
+Separate forms created for the Django module:
+#### LoginForm: 
 ```
-ANY CODE WE HAVE HERE
+model = Username
+fields = ["username", 'user_id']
+```
+
+#### ResponseForm:
+```
+model = ResponsesModel
+fields = ['diet', 'distance', 'address', 'hurry', 'arrival_day', 'arrival_time']
+```
+
+#### SearchRestaurantsForm
+```
+model = SearchRestaurantsModel
+fields = ['search_query1', 'search_query2', 'search_query3', 'search_query4', 'search_query5']
+```
+
+#### PickRestaurantsForm:
+```
+model = PickRestaurantsModel
+fields = ['pick_results1', 'pick_results2', 'pick_results3', 'pick_results4', 'pick_results5']
+```
+
+#### RecommendationForm:
+```
+model = RecommendationModel
+fields = ['accept']
+```
+
+#### RejectionForm:
+```
+model = RejectionModel
+fields = ["cuisine", "price_high", "price_low"]
 ```
