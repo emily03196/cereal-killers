@@ -4,18 +4,22 @@
 
 <form name='pickrestaurantsform' action='/pandora/{{  user_id  }}/pickrestaurants/' method='post'>
     {% csrf_token %}
+
     <p>
     Search Results: 
     </p>    
     {{  form.pick_result  }}
+    <font color='red'>{{ form.pick_result.errors  }}</font>
     <p>
     How do you rate this restaurant? 
     </p>    
     {{ form.rating  }}
+    <font color='red'>{{ form.rating.errors  }}</font>
     <p>
     Do you want to re-do your search or add another restaurant to your history? 
     </p>    
     {{  form.search_again  }}
+    <font color='red'>{{ form.search_again.errors  }}</font>
 
     <input type="submit" value="Submit" />
 

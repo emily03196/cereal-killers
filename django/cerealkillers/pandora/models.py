@@ -55,18 +55,18 @@ class PickRestaurantsModel(models.Model):
     search_choices = models.ManyToManyField(SearchChoicesModel)
     
     pick_result = models.CharField(max_length=200, default=None, blank=True)
-    rating_choices = [(1,1), (2,2), (3,3), (4,4), (5,5)]
+    rating_choices = [('1','1'), ('2','2'), ('3','3'), ('4','4'), ('5','5')]
     rating = models.CharField(max_length=1, choices=rating_choices, default=5)
     search_again = models.BooleanField(choices=[(True, 'Yes'), (False, 'No')], default=False)
     
 
 class RecommendationModel(models.Model):
-    user= models.OneToOneField(Username, on_delete=models.CASCADE, unique=True)
+    user= models.ForeignKey(Username, on_delete=models.CASCADE)
 
     accept = models.BooleanField(choices=[(True, 'Yes'), (False, 'No')], default=False)
 
 class RejectionModel(models.Model):
-    user= models.OneToOneField(Username, on_delete=models.CASCADE, unique=True)
+    user= models.ForeignKey(Username, on_delete=models.CASCADE)
 
     cuisine = models.BooleanField(choices=[(True, 'Yes'), (False, 'No')], default=False)
     price_high = models.BooleanField(choices=[(True, 'Yes'), (False, 'No')], default=False)

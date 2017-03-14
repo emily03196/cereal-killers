@@ -23,7 +23,9 @@ class SearchRestaurantsForm(ModelForm):
         fields = ['search_query']
 
 class PickRestaurantsForm(ModelForm):
-    pick_result = forms.ModelMultipleChoiceField(required=False, queryset=SearchChoicesModel.objects.all(), widget=forms.RadioSelect)
+    queryset_choices = SearchChoicesModel.objects.all().order_by('-id')[:10]
+    list_choices = [(ch, ch) for ch in list(queryset_choices)]
+    pick_result = forms.ChoiceField(required=False, choices=list_choices, widget=forms.RadioSelect)
     class Meta:
         model = PickRestaurantsModel
         fields = ['rating', 'search_again']
