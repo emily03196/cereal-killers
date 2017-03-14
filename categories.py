@@ -1,3 +1,9 @@
+'''
+Used to obtain lists of positive and negative words for the individual categories of 
+service, wait time, and environment, along with list of dietary choices to be used 
+in the final sentiment dictionary. 
+'''
+
 # Modifiers
 positive_words = ['good', 'best', 'great', 'outstanding', 'excellent', 'amazing', 'spectacular', \
     'wonderful', 'magnificent', 'awesome', 'perfect', 'phenomenal', 'cool', 'favorite', 'fantastic', \
