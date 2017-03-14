@@ -82,30 +82,55 @@ Example sentiment dictionary output:
 }
 ```
 
-### Audrey_user.py
-Generates the overall recommendation for the restaurant based on user history to generate the user's individual cuisine preferences. The algorithm then locates potential restaurants that match the user's specifications for distance from, hours to, and scores each of the restaurants based on these requirements. The algorithm then outputs a final restaurant as the recommendation. 
+### django/cerealkillers/pandora/COPY_Audrey_User.py
+Takes in user input to make a user object, extract preferences based on user history (restaurants he's been to and his ratings for each), takes into account specific requirements (hours, distance, dietary restrictions, environment, service, waiting time), generate a recommendation, and if rejected, generate a next recommendation. The algorithm scores each potential restaurant and sorts them on different levels to get a satisfying result the user is likely to accept. The codes also contain a series of functions to modify certain changes made to the input to update the user object.
 
 Example input into the algorithm:
 ```
-been_to_dic = {'Yusho': 4, 'bellyQ': 3, 'Chicago Peoples Temple': 5, 'Dine': 4}
+been_to_dic = {'bistronomic': 4, 'Yum Cha': 3, 'Zoku Sushi': 5, 'Wildfire - Chicago': 4}
 address = '6031 South Ellis Ave'
 max_distance = 20
 dietary_restriction = ['Vegetarian']
 time = 'Monday 1800'
 username = 'Liz'
 keywords = {'environment': None, 'service': None, 'waiting': None}
+user = User(username, address, time, dietary_restriction, max_distance, been_to_dic, keywords)
+rec, rec_lst = user.generate_recommendation()
 ```
 Example output:
 ```
-ANY CODE WE HAVE HERE
+rec
+{'address': '',
+ 'been_to_score': 0,
+ 'cuisine_lst': ['Steakhouses'],
+ 'cuisine_score': 9.473684210526315,
+ 'dietary_restriction_multiplier': 1,
+ 'distance': 11.294012953158164,
+ 'keywords_multiplier': 1,
+ 'phone': '7736619893',
+ 'price': 2,
+ 'price_score': 3.75,
+ 'rating_score': 4.5,
+ 'restaurant': 'Revolucion Steakhouse'}
 ```
-
 If the restaurant is rejected, we input:
 ```
-ANY CODE WE HAVE HERE
+rec, rec_lst = user.reject(rec_lst, not_cuisine = True, price_too_high = None, price_too_low = None)
+rec
+{'address': '',
+ 'been_to_score': 0,
+ 'cuisine_lst': ['Sushi Bars', 'Japanese'],
+ 'cuisine_score': 5.9210526315789469,
+ 'dietary_restriction_multiplier': 1,
+ 'distance': 11.240133759242921,
+ 'keywords_multiplier': 1,
+ 'phone': '7732816400',
+ 'price': 2,
+ 'price_score': 3.75,
+ 'rating_score': 4.7,
+ 'restaurant': 'Rollapalooza'}
 ```
 and the restaurant generates a new recommendation until we accept the final recommendation. 
-
 
 
 ## Usage
