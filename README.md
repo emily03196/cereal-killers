@@ -24,14 +24,38 @@ References "categories.py" to parse through reviews from the Google Place Search
 
 Example review data:
 ```
-{…‘Umi’: ['Amazing sushi! Very fresh and super tasty. I love their philly and miami options. Staff is very friendly and great environment to dine in.', ‘Some of the best ramen I've had so far in Chicago, and I'm something of a ramen snob. Great, friendly service, nice decor, good sushi. Never had to wait for a table. Ice cold Sapporo. Convenient parking. Reasonable prices. \n\nWhat more can I say? I think the place is great.  I will be a regular...’, …]…}
-
+{
+  ‘Umi’: ['Amazing sushi! Very fresh and super tasty. I love their philly and miami options. Staff is very friendly and great
+  environment to dine in.', 
+  ‘Some of the best ramen I've had so far in Chicago, and I'm something of a ramen snob. Great, friendly service, nice decor, good
+  sushi. Never had to wait for a table. Ice cold Sapporo. Convenient parking. Reasonable prices. What more can I say? I think the place   is great.  I will be a regular...’
+}
 ```
 
 Example sentiment dictionary output:
 ```
-{'The Portage': {'dietary_choices': [vegetarian],  'environment_score': 0.12498000000000001,  'service_score': 0.04213999999999999,  'waiting_score': -0.16599999999999998}, 'The Publican': {'dietary_choices': [allergy],  'environment_score': 0.0,  'service_score': 0.09878,  'waiting_score': -0.198}, 'The Rosebud': {'dietary_choices': [],  'environment_score': 0.16514,  'service_score': 0.12498000000000001,  'waiting_score': -0.066}, 'The Savoy': {'dietary_choices': [],  'environment_score': 0.0,  'service_score': 0.41717999999999994,  'waiting_score': -0.066}}
-
+{
+ 'The Portage': 
+    {'dietary_choices': [vegetarian],  
+     'environment_score': 0.12498000000000001,  
+     'service_score': 0.04213999999999999,  
+     'waiting_score': -0.16599999999999998}, 
+ 'The Publican': 
+    {'dietary_choices': [allergy],  
+    'environment_score': 0.0,  
+    'service_score': 0.09878,  
+    'waiting_score': -0.198}, 
+ 'The Rosebud': 
+    {'dietary_choices': [],  
+    'environment_score': 0.16514,  
+    'service_score': 0.12498000000000001,  
+    'waiting_score': -0.066}, 
+ 'The Savoy': 
+    {'dietary_choices': [],  
+    'environment_score': 0.0,  
+    'service_score': 0.41717999999999994,  
+    'waiting_score': -0.066}
+}
 ```
 
 ### Audrey_user.py
