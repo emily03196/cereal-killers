@@ -25,6 +25,8 @@ Sample data:
 
 Reads in Yelp and Google Places data previously stored from API calls
 
+Data files used: final_yelp_dic.json (yelp data in dictionary format), ot_data.json (OT data in list format, converted to dictionary in the file), big_google.json (Google data in dictionary format), sentiment_dic.json (dictionary created using big_google.json and reviews.py)
+
 Sample index entry:
 ```
 main_index3 = {"Rivers": {"cuisine": ["American (New)", "Seafood"], "rating": 4.4, "phone": "3125591515", "url": "https://maps.google.com/?cid=16598770869000221617", "image_url": "https://www.opentable.com/img/restimages/3583.jpg", "price": 2, "hours": {"Friday": ["1130", "2200"], "Saturday": ["1700", "2200"], "Tuesday": ["1130", "2100"], "Monday": ["1130", "2100"], "Thursday": ["1130", "2100"], "Wednesday": ["1130", "2100"]}, "location": {"address": "10 & 30 South Wacker Drive", "lon": -87.6369, "lat": 41.8815}, "analyzed_reviews": {"dietary_choices": [], "service_score": 0.18308, "waiting_score": -0.066, "environment_score": 0.0}}...}
@@ -105,11 +107,7 @@ ANY CODE WE HAVE HERE
 and the restaurant generates a new recommendation until we accept the final recommendation. 
 
 
-### search.py
 
-```
-ANY CODE WE HAVE HERE
-```
 ## Usage
 
 ### Django Module
