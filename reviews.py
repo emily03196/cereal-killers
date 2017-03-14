@@ -7,9 +7,11 @@ import json
 from collections import Counter
 from nltk.sentiment.vader import SentimentIntensityAnalyzer
 
-# Processes the reviews obtained from the Google Places API and generates a final 
-# sentiment dictionary attached to each restaurant that is used in the 
-# recommendation algorithm. 
+'''
+Processes the reviews obtained from the Google Places API and generates a final 
+sentiment dictionary attached to each restaurant that is used in the 
+recommendation algorithm. 
+'''
 
 REMOVE_WORDS = ['the', 'a', 'an', 'but', 'if', 'so', 'they', 'them', 'is', 'and', 'to', 'of',\
  'for', 'it', '', 'very', 'their', 'this', 'i', 'my', 'are', 'be', 'was', 'were', 'in', 'as', 'at', \
