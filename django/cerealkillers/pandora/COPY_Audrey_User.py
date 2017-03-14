@@ -1,7 +1,5 @@
-from math import radians, cos, sin, asin, sqrt
 import json
 import numpy as np
-import csv
 from geopy.geocoders import Nominatim
 geolocator = Nominatim()
 from geopy.distance import vincenty
@@ -27,14 +25,14 @@ class User:
     
     def __init__(self, username, address, time, dietary_restriction, max_distance, been_to_dic, \
         keywords):
-        self.user_lat = None #None or numerical
-        self.user_lon = None #None or numerical
-        self.max_distance = None #None or numerical
+        self.user_lat = None #None or float
+        self.user_lon = None #None or float
+        self.max_distance = None #None or float
         self.address = address #None or string
         self.dietary_restriction = []
-        self.keywords = {} #dictionary
+        self.keywords = {} 
         self.day = None #None or string
-        self.hour = None #None or string
+        self.hour = None #None or float
 
         if address: 
             location = geolocator.geocode(address)
@@ -59,15 +57,15 @@ class User:
     def locate(self):
         '''
         Gives a dictionary of restaurants that are within the maximal distance from the user and 
-        that are open
+        that are open at the time the user indicates
         '''
         located_restaurants = {}
         if self.user_lat is not None and self.hour is not None:
             for restaurant, sub_dic in self.data_dic.items():
-                lat2 = sub_dic['location'].get('lat', 0)#some restaurants don't have locations/latitude
+                lat2 = sub_dic['location'].get('lat', 0)
                 lon2 = sub_dic['location'].get('lon', 0)
                 miles = vincenty((self.user_lat, self.user_lon), (lat2, lon2)).miles
-                closing_hr = 2400#some restaurants don't have hours
+                closing_hr = 2400#some restaurants don't have hours on the day the user indicates
                 opening_hr = 0
                 hours = sub_dic['hours']
                 if self.day in sub_dic['hours']: 
@@ -89,7 +87,7 @@ class User:
                     located_restaurants[restaurant]['distance'] = miles
         elif self.user_lat is not None:
             for restaurant, sub_dic in self.data_dic.items():
-                lat2 = sub_dic.get('location', {}).get('lat', 0)#some restaurants don't have locations/latitude
+                lat2 = sub_dic.get('location', {}).get('lat', 0)
                 lon2 = sub_dic.get('location', {}).get('lon', 0)
                 miles = vincenty((self.user_lat, self.user_lon), (lat2, lon2)).miles
                 if miles <= self.max_distance:
@@ -186,7 +184,7 @@ class User:
                     for cuisine in cuisine_lst:
                         if cuisine in disliked_cuisine_lst:
                             cuisine_score -= 5*self.cuisine_preference_dic.get(cuisine,0)/len(cuisine_lst)\
-                             - 1/len(cuisine_lst) #needs to rethink how much to subtract
+                             - 1/len(cuisine_lst)
                     rec['cuisine_score'] = cuisine_score
             if price_too_high is True:
                 recommendation_lst = [recommendation for recommendation in recommendation_lst if \
@@ -226,7 +224,7 @@ class User:
             match = re.search("([\w]+)( )([\d]+)", new_time)
             self.day = match.group(1)
             self.hour = match.group(3)
-            #need to call locate again (automatically included in generate_recommendation)
+        #need to call locate again (automatically included in generate_recommendation)
 
     def modify_history(self, new_been_to_dic):
         self.been_to_dic = new_been_to_dic
@@ -241,7 +239,3 @@ class User:
         
     def accept(self, rec):
         return self.username, self.been_to_dic, self.address, rec
-
-#helpful reviews or most recent reviews
-#user puts in single word, bigrams. 
-#put in dumplings. show the part of the reviews. 
