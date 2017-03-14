@@ -159,8 +159,11 @@ def recommendation(request, user_id):
             rec_restaurant = recommendation['restaurant']
             rec_address = recommendation['address']
             rec_phone = recommendation['phone']
+            rec_cuisine = recommendation['cuisine_lst']
+            rec_distance = recommendation['distance']
+            rec_rating = recommendation['rating_score']
         form = RecommendationForm()
-        return render(request, 'pandora/recommendation.html', {'form': form, 'user_id': user_id, 'rec_restaurant': rec_restaurant, 'rec_address':rec_address, 'rec_phone': rec_phone})
+        return render(request, 'pandora/recommendation.html', {'form': form, 'user_id': user_id, 'rec_restaurant': rec_restaurant, 'rec_address':rec_address, 'rec_phone': rec_phone, 'rec_cuisine':rec_cuisine, 'rec_distance':rec_distance, 'rec_rating':rec_rating})
 
 def rejection(request, user_id):
     if request.method == 'POST':

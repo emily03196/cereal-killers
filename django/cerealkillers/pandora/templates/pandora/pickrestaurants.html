@@ -1,12 +1,12 @@
 <p><strong>
-    Select the restaurant from these results to add to your history.
+    Select a restaurant that you've visited, and liked, from the drop down to add to your history.
 </strong></p>
 
 <form name='pickrestaurantsform' action='/pandora/{{  user_id  }}/pickrestaurants/' method='post'>
     {% csrf_token %}
 
     <p>
-    Search Restaurants: 
+    Select Restaurant: 
     </p>    
     {{  form.pick_result  }}
     <font color='red'>{{ form.pick_result.errors  }}</font>
