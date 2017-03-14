@@ -27,6 +27,7 @@ Reads in Yelp and Google Places data previously stored from API calls
 
 
 ```
+main_index3 = {"Rivers": {"cuisine": ["American (New)", "Seafood"], "rating": 4.4, "phone": "3125591515", "url": "https://maps.google.com/?cid=16598770869000221617", "image_url": "https://www.opentable.com/img/restimages/3583.jpg", "price": 2, "hours": {"Friday": ["1130", "2200"], "Saturday": ["1700", "2200"], "Tuesday": ["1130", "2100"], "Monday": ["1130", "2100"], "Thursday": ["1130", "2100"], "Wednesday": ["1130", "2100"]}, "location": {"address": "10 & 30 South Wacker Drive", "lon": -87.6369, "lat": 41.8815}, "analyzed_reviews": {"dietary_choices": [], "service_score": 0.18308, "waiting_score": -0.066, "environment_score": 0.0}}...}
 
 ```
 
