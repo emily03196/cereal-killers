@@ -117,7 +117,7 @@ If the restaurant is rejected, we input:
 ```
 rec, rec_lst = user.reject(rec_lst, not_cuisine = True, price_too_high = None, price_too_low = None)
 ```
-Example outiput:
+Example output:
 ```
 rec
 {'address': '',
