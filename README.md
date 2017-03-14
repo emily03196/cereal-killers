@@ -20,6 +20,16 @@ Reads in Yelp and Google Places data previously stored from API calls
 ANY CODE WE HAVE HERE
 ```
 
+### categories.py
+Used to obtain lists of positive and negative words for the individual categories of service, wait time, and environment, along with a list of dietary choices to be used in the final sentiment dictionary. 
+
+For example:
+```
+waiting_pos = ['fast', 'quick', 'short', 'immediate']
+waiting_neg = ['long', 'slow', 'busy', 'wait', 'packed']
+waiting = ['time', 'wait', 'waited']
+```
+
 ### reviews.py
 References "categories.py" to parse through reviews from the Google Place Search API and determines a final sentiment dictionary for each individual restaurant. 
 
